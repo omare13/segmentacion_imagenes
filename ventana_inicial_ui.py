@@ -48,6 +48,10 @@ class Ui_MainWindow(object):
         self.frame_edicion = QtWidgets.QGraphicsView(self.centralwidget)
         self.frame_edicion.setGeometry(QtCore.QRect(25, 81, 691, 541))
         self.frame_edicion.setObjectName("frame_edicion")
+
+        # https://stackoverflow.com/questions/7772080/tracking-mouse-move-in-qgraphicsscene-class
+        self.frame_edicion.setMouseTracking(True)
+
         self.boton_borrar = QtWidgets.QToolButton(self.centralwidget)
         self.boton_borrar.setGeometry(QtCore.QRect(660, 30, 51, 31))
         self.boton_borrar.setObjectName("boton_borrar")

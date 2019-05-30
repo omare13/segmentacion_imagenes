@@ -7,9 +7,9 @@ class Imagen:
 
 
 class Segmento:
-    def __init__(self):
-        self.nombre = None
-        self.puntos = []
+    def __init__(self, puntos, nombre):
+        self.nombre = nombre
+        self.puntos = puntos
         self.comentario = None
 
 
