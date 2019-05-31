@@ -3,6 +3,7 @@ import os
 import re
 import clases
 import pickle
+import obtenerGrafo
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -259,6 +260,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # TODO - Los paso a grafo
         fichero_grafo = self.self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
         ruta_fichero_grafo = carpeta_anotaciones + fichero_grafo
+        self.guardar_grafo(ruta_fichero_grafo)
 
     def desmontar_imagen(self):
         for item_escena in self.escena.items():
@@ -295,6 +297,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.segmentos = None
         self.n_puntos = 0
         self.n_segmentos = 0
+
+    def guardar_grafo(self, ruta_fichero):
+        with open(ruta_fichero, "w", encoding="UTF-8") as fichero:
+            fichero.write("NODOS:\n")
+            for i, punto in enumerate(self.puntos):
+                fichero.write()
 
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
