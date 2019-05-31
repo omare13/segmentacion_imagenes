@@ -152,6 +152,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fichero_puntos = self.imagenes[self.imagen_actual].nombre+"_puntos.pickle"
         fichero_segmentos = self.imagenes[self.imagen_actual].nombre+"_segmentos.pickle"
 
+        print(carpeta_anotaciones)
         if fichero_puntos in os.listdir(carpeta_anotaciones):
             print("ENCONTRADOS PUNTOS")
             with open(carpeta_anotaciones + fichero_puntos, "rb") as file:
@@ -258,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pickle.dump(self.segmentos, file)
 
         # TODO - Los paso a grafo
-        fichero_grafo = self.self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
+        fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
         ruta_fichero_grafo = carpeta_anotaciones + fichero_grafo
         self.guardar_grafo(ruta_fichero_grafo)
 
@@ -299,11 +300,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.n_segmentos = 0
 
     def guardar_grafo(self, ruta_fichero):
-        trazos = [[punto.x, punto.y] for punto in self.puntos]
+        print("GUARDAR GRAFO")
+        trazos = [[[punto.x, punto.y]] for punto in self.puntos]
+        print(trazos)
         for segmento in self.segmentos:
+            trazos_segmento = []
             for punto in segmento.puntos:
-                trazos.append([punto.x, punto.y])
+                trazos_segmento.append([punto.x, punto.y])
+            trazos.append(trazos_segmento)
+
+        print(trazos)
+        print("GENERANDO GRAFO")
         grafo = obtenerGrafo.obtenerGrafo(trazos, 6)
+        print("GUARDANDO GRAFO")
         obtenerGrafo.salvarGrafo(grafo[0], grafo[1], ruta_fichero)
 
 

@@ -14,6 +14,7 @@ from copy import deepcopy
 
 
 MAX_DIST_MISMO_PUNTO = 6
+MINDIST = 6
 
 # ************************************************************************************************
 
@@ -143,7 +144,7 @@ def agruparPuntosProximos(listaPuntos, MINDIST):
 
 
 def obtenerGrafo(listaTrazos, MAX_DIST_MISMO_PUNTO):
-	#listaTrazos = [[[1,0], [0,0],[0,1],[1,1], [2,1]],   [[1,0], [1,1], [1,2]]]
+	#listaTrazos = [ [ [1,0],[0,0],[0,1],[1,1],[2,1] ],   [ [1,0],[1,1],[1,2] ] ]
 	# obtener puntos, cambiando los muy próximos al mismo punto
 	# crear un diccionario para relacionar los nodos con sus coordenadas
 	# poner los enlaces entre nodos siguiendo los tramos
