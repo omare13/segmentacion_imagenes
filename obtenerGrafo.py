@@ -13,41 +13,7 @@ import numpy as np
 from copy import deepcopy
 
 
-# initialize the list of reference points and boolean indicating
-# whether cropping is being performed or not
-listaTrazos = []
-trazo = []
-itDibujo = 0           # < ---------------------   CAMBIAR PARA EMPEZAR POR OTRA DIBUJO
-
-
-
-zoom = 1
 MAX_DIST_MISMO_PUNTO = 6
-
-clavesDibujo = ["CASA","CUBO","CIRCULO","CRUZ","CUADRADO","TRIANGULO","PICO","MINIMENTAL","MUELLE","REY"]
-claveAnotacion = ["REF", "GRAFO1", "DOBLELINEA", "CONEXIONPASA"]
-claveGrafo = "GRAFO"
-
-
-dibujoAct = clavesDibujo[9]
-signoAct = claveAnotacion[1]
-
-
-
-PATH_BASE = "TEST/"
-dibujosWorkingDirectory = PATH_BASE +"3_DIBUJOS/" + dibujoAct + "/"
-dibujosExtension = "jpg"
-
-signosWorkingDirectory = PATH_BASE + "3_ANOTACIONES/" + dibujoAct  + "/"
-anotacion_Extension = "_" + signoAct +  ".txt"
-anotacion_GRAFO = "_" + signoAct + "_"+ claveGrafo + ".txt"
-
-
-comentario = ""
-
-if not(os.path.exists(signosWorkingDirectory)):
-	os.mkdir(signosWorkingDirectory)
-
 
 # ************************************************************************************************
 

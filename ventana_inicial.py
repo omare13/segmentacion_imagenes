@@ -299,10 +299,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.n_segmentos = 0
 
     def guardar_grafo(self, ruta_fichero):
-        with open(ruta_fichero, "w", encoding="UTF-8") as fichero:
-            fichero.write("NODOS:\n")
-            for i, punto in enumerate(self.puntos):
-                fichero.write()
+        trazos = [[punto.x, punto.y] for punto in self.puntos]
+        for segmento in self.segmentos:
+            for punto in segmento.puntos:
+                trazos.append([punto.x, punto.y])
+        grafo = obtenerGrafo.obtenerGrafo(trazos, 6)
+        obtenerGrafo.salvarGrafo(grafo[0], grafo[1], ruta_fichero)
 
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
