@@ -7,21 +7,50 @@ Created on Fri Mar  8 20:09:18 2019
 """
 # import the necessary packages
 import argparse
+import cv2
 import os 
 import csv
 import numpy as np
 from copy import deepcopy
 
 
+# initialize the list of reference points and boolean indicating
+# whether cropping is being performed or not
+listaTrazos = []
+trazo = []
+itDibujo = 0           # < ---------------------   CAMBIAR PARA EMPEZAR POR OTRA DIBUJO
+
+
+
+zoom = 1
 MAX_DIST_MISMO_PUNTO = 6
-MINDIST = 6
+
+clavesDibujo = ["CASA","CUBO","CIRCULO","CRUZ","CUADRADO","TRIANGULO","PICO","MINIMENTAL","MUELLE","REY"]
+claveAnotacion = ["REF", "GRAFO1", "DOBLELINEA", "CONEXIONPASA"]
+claveGrafo = "GRAFO"
+
+
+dibujoAct = clavesDibujo[9]
+signoAct = claveAnotacion[1]
+
+
+
+PATH_BASE = "TEST/"
+dibujosWorkingDirectory = PATH_BASE +"3_DIBUJOS/" + dibujoAct + "/"
+dibujosExtension = "jpg"
+
+signosWorkingDirectory = PATH_BASE + "3_ANOTACIONES/" + dibujoAct  + "/"
+anotacion_Extension = "_" + signoAct +  ".txt"
+anotacion_GRAFO = "_" + signoAct + "_"+ claveGrafo + ".txt"
+
+
+comentario = ""
+
+# if not(os.path.exists(signosWorkingDirectory)):
+# 	os.mkdir(signosWorkingDirectory)
+
 
 # ************************************************************************************************
-
-
-	 
-#import numpy as np
-#np.savetxt("file_name.csv", data1, delimiter=",", fmt='%s', header=header)
 
 def list_files(directory, extension):
 	
@@ -144,7 +173,7 @@ def agruparPuntosProximos(listaPuntos, MINDIST):
 
 
 def obtenerGrafo(listaTrazos, MAX_DIST_MISMO_PUNTO):
-	#listaTrazos = [ [ [1,0],[0,0],[0,1],[1,1],[2,1] ],   [ [1,0],[1,1],[1,2] ] ]
+	#listaTrazos = [[[1,0], [0,0],[0,1],[1,1], [2,1]],   [[1,0], [1,1], [1,2]]]
 	# obtener puntos, cambiando los muy próximos al mismo punto
 	# crear un diccionario para relacionar los nodos con sus coordenadas
 	# poner los enlaces entre nodos siguiendo los tramos
@@ -272,42 +301,3 @@ def salvarGrafo(listaNodos, listaArcos, fichero):
 	for val in listaArcos:
 		f.write( str(val[0]) + " - " + str(val[1]) + "\n")
 	f.close()
-
-def leerGrafo(fileName):	
-	listaNodos = {}
-	listaArcos = []
-	
-	if os.path.exists(fileName):
-		with open(fileName, "r") as file:
-			# saltar lineas 	hasta que aparezca la palabra clave NODOS
-			while (1):
-				linea = file.readline()
-				if linea == "NODOS:\n":
-					break
-			# leer nodos	
-			while (1):
-				linea = file.readline()
-				posSep = linea.find("-")
-				if posSep == -1:
-					break
-				# asignar nodo
-				listaNodos.update({eval(linea[posSep+1:-1]) : int(linea[0:posSep-1])})
-
-
-			# saltar lineas 	hasta que aparezca la palabra clave ARCOS
-			while (1):
-				linea = file.readline()
-				if linea == "ARCOS:\n":
-					break
-			# leer nodos	
-			while (1):
-				linea = file.readline()
-				posSep = linea.find("-")
-				if posSep == -1:
-					break
-				# asignar arco
-				listaArcos.append([int(linea[0:posSep-1]),int(linea[posSep+1:-1])])
-
-			return(listaNodos, listaArcos)
-
-	return(listaNodos, listaArcos)

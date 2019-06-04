@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from ventana_inicial_ui import *
 import os
 import re
 import clases
 import pickle
 import obtenerGrafo
+import math
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -301,16 +303,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def guardar_grafo(self, ruta_fichero):
         print("GUARDAR GRAFO")
-        trazos = [[[punto.x, punto.y]] for punto in self.puntos]
-        print(trazos)
+
+        trazos = []
+
         for segmento in self.segmentos:
             trazos_segmento = []
             for punto in segmento.puntos:
-                trazos_segmento.append([punto.x, punto.y])
+                trazos_segmento.append((math.floor(punto.x), math.floor(punto.y)))
             trazos.append(trazos_segmento)
 
-        print(trazos)
+        for punto in self.puntos:
+            trazos.append([(math.floor(punto.x), math.floor(punto.y))])
+
+        print(trazos, "TRAZOS")
+
         print("GENERANDO GRAFO")
+        print(trazos, "TRAZOS")
         grafo = obtenerGrafo.obtenerGrafo(trazos, 6)
         print("GUARDANDO GRAFO")
         obtenerGrafo.salvarGrafo(grafo[0], grafo[1], ruta_fichero)
@@ -431,4 +439,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     window = MainWindow()
     window.show()
-    app.exec_()
+    try:
+        app.exec_()
+    except:
+        pass
