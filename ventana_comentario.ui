@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ventana_comentario</class>
+ <widget class="QDialog" name="ventana_comentario">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>543</width>
+    <height>208</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Insertar Comentario</string>
+  </property>
+  <widget class="QLabel" name="label_comentario">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>29</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Comentario</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="texto_comentario">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>30</y>
+     <width>391</width>
+     <height>101</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QSplitter" name="botones_comentario">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>160</y>
+     <width>186</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="handleWidth">
+    <number>20</number>
+   </property>
+   <widget class="QPushButton" name="boton_aceptar">
+    <property name="text">
+     <string>Aceptar</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="boton_cancelar">
+    <property name="text">
+     <string>Cancelar</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
