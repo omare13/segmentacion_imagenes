@@ -310,13 +310,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             elemento = self.escena.dibujar_punto(punto)
 
             # TODO - Incluir el elemento en la lista de elementos
-            self.escena.update({punto.nombre: elemento})
+            self.escena.elementos.update({punto.nombre: elemento})
 
         for segmento in self.segmentos:
             self.escena.dibujar_segmento(segmento)
 
             # TODO - Incluir el elemento en la lista de elementos
-            self.escena.update({segmento.nombre: segmento})
+            self.escena.elementos.update({segmento.nombre: segmento})
 
     def reset_modelo(self):
         self.estado = "INIT"
@@ -493,7 +493,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             punto = clases.Punto(self.path.elementAt(i_elemento).x, self.path.elementAt(i_elemento).y)
             puntos.append(punto)
 
-        self.parent.add_segmento(puntos, self.path)
+        self.parent.add_segmento(puntos, self.path_item)
 
         # Elimino las variables de manejo del path
         self.path = None
@@ -510,7 +510,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         y = punto.y
 
         # Dibujo el punto y lo devuelvo
-        return self.addEllipse(x, y, 4, 4, pen, brush)
+        elipse = self.addEllipse(x, y, 4, 4, pen, brush)
+        return elipse
 
     def dibujar_segmento(self, segmento):
         path = QtGui.QPainterPath(QtCore.QPointF(segmento.puntos[0].x, segmento.puntos[0].y))
@@ -518,12 +519,20 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             path.lineTo(QtCore.QPointF(punto.x, punto.y))
 
         # Dibujo el segmento y lo devuelvo
-        return self.addPath(path, pen=self.path_pen)
+        path = self.addPath(path, pen=self.path_pen)
+        return path
 
     def borrar_elemento(self, nombre_elemento):
-        item = self.elementos.get(nombre_elemento)
-        self.removeItem(item)
-        self.elementos.pop(nombre_elemento)
+        elemento_a_borrar = self.elementos.get(nombre_elemento)
+        print(elemento_a_borrar, "ITEM A BORRAR")
+        print(type(elemento_a_borrar), "TIPO DE ITEM A BORRAR")
+        self.removeItem(elemento_a_borrar)
+        for item in self.items():
+            print(item.__dict__, "ITEMS")
+            print(item, "ITEMS")
+            if item is elemento_a_borrar or item == elemento_a_borrar:
+                self.removeItem(item)
+        # self.elementos.pop(nombre_elemento)
 
 
 if __name__ == "__main__":
