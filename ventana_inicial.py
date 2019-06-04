@@ -270,13 +270,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(fichero_puntos)
         print(fichero_segmentos)
 
-        if len(self.puntos) > 0:
-            with open(carpeta_anotaciones + fichero_puntos, 'wb') as file:
-                pickle.dump(self.puntos, file)
 
-        if len(self.segmentos) > 0:
-            with open(carpeta_anotaciones + fichero_segmentos, 'wb') as file:
-                pickle.dump(self.segmentos, file)
+        with open(carpeta_anotaciones + fichero_puntos, 'wb') as file:
+            pickle.dump(self.puntos, file)
+
+        with open(carpeta_anotaciones + fichero_segmentos, 'wb') as file:
+            pickle.dump(self.segmentos, file)
 
         # Los paso a grafo
         fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
@@ -313,10 +312,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.escena.elementos.update({punto.nombre: elemento})
 
         for segmento in self.segmentos:
-            self.escena.dibujar_segmento(segmento)
+            elemento = self.escena.dibujar_segmento(segmento)
 
             # TODO - Incluir el elemento en la lista de elementos
-            self.escena.elementos.update({segmento.nombre: segmento})
+            self.escena.elementos.update({segmento.nombre: elemento})
 
     def reset_modelo(self):
         self.estado = "INIT"
@@ -528,11 +527,10 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         print(type(elemento_a_borrar), "TIPO DE ITEM A BORRAR")
         self.removeItem(elemento_a_borrar)
         for item in self.items():
-            print(item.__dict__, "ITEMS")
-            print(item, "ITEMS")
             if item is elemento_a_borrar or item == elemento_a_borrar:
                 self.removeItem(item)
-        # self.elementos.pop(nombre_elemento)
+                print("BORRADO")
+        self.elementos.pop(nombre_elemento)
 
 
 if __name__ == "__main__":
