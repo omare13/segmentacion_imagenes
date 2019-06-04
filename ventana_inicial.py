@@ -191,7 +191,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print("AÑADIR PUNTO")
         # Creo un objeto punto y lo añado al aray de puntos
         nombre_punto = "Punto_" + str(self.n_puntos)
-        punto = clases.Punto(coord_x, coord_y, nombre_punto, elemento)
+        punto = clases.Punto(coord_x, coord_y, nombre_punto)
         self.puntos.append(punto)
 
         # Aumento el contador de puntos para variar los nombres
@@ -202,7 +202,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item_punto = QtWidgets.QListWidgetItem(self.lista_puntos)
         item_punto.setText(nombre_punto)
 
-        # TODO - Añado el ítem al historial de ediciones
+        # TODO - Añado el elemento visual a la lista de elementos visuales
+        self.escena.elementos.update({nombre_punto: elemento})
 
         # Paso al estado inicial
         self.estado_inicial()
@@ -213,7 +214,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         nombre_segmento = "Segmento_" + str(self.n_segmentos)
 
         # Creo el segmento y lo añado al array de segmentos
-        segmento = clases.Segmento(puntos_segmento, nombre_segmento, elemento)
+        segmento = clases.Segmento(puntos_segmento, nombre_segmento)
         self.segmentos.append(segmento)
 
         # Aumento el contador de segmentos para variar los nombres
@@ -225,6 +226,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item_segmento.setText(nombre_segmento)
 
         # TODO - Añado ítem al historial de ediciones
+        self.escena.elementos.update({nombre_segmento: elemento})
 
         # Paso al estado inicial
         self.estado_inicial()
@@ -236,6 +238,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.reset_modelo()
             self.vaciar_listas()
             self.imagen_actual -= 1
+            self.escena.init_escena()
             self.cargar_imagen()
 
     def imagen_siguiente(self):
@@ -245,6 +248,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.reset_modelo()
             self.vaciar_listas()
             self.imagen_actual += 1
+            self.escena.init_escena()
             self.cargar_imagen()
 
     def estado_inicial(self):
@@ -274,7 +278,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with open(carpeta_anotaciones + fichero_segmentos, 'wb') as file:
                 pickle.dump(self.segmentos, file)
 
-        # TODO - Los paso a grafo
+        # Los paso a grafo
         fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
         ruta_fichero_grafo = carpeta_anotaciones + fichero_grafo
         self.guardar_grafo(ruta_fichero_grafo)
@@ -303,10 +307,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def dibujar_puntos(self):
         for punto in self.puntos:
-            self.escena.dibujar_punto(punto)
+            elemento = self.escena.dibujar_punto(punto)
+
+            # TODO - Incluir el elemento en la lista de elementos
+            self.escena.update({punto.nombre: elemento})
 
         for segmento in self.segmentos:
             self.escena.dibujar_segmento(segmento)
+
+            # TODO - Incluir el elemento en la lista de elementos
+            self.escena.update({segmento.nombre: segmento})
 
     def reset_modelo(self):
         self.estado = "INIT"
@@ -341,7 +351,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def mostrar_comentario(self):
         nombre, index = self.resaltado
-        tipo_item = nombre.text().split("_")[0]
+        tipo_item = nombre.split("_")[0]
         self.ventana_comentario = CommentWindow(parent=self, tipo_item=tipo_item, index=index)
         self.ventana_comentario.show()
 
@@ -350,13 +360,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.resaltado is not None:
             nombre, index = self.resaltado
             if "Segmento" in nombre:
-                self.escena.borrar_elemento(self.segmentos[index].elemento)
+                self.escena.borrar_elemento(self.segmentos[index].nombre)
                 nuevos_segmentos = [segmento for i, segmento in enumerate(self.segmentos) if i != index]
                 self.segmentos = nuevos_segmentos
                 self.lista_segmentos.takeItem(index)
                 print(self.segmentos)
             elif "Punto" in nombre:
-                self.escena.borrar_elemento(self.puntos[index].elemento)
+                self.escena.borrar_elemento(self.puntos[index].nombre)
                 nuevos_puntos = [punto for i, punto in enumerate(self.puntos) if i != index]
                 self.puntos = nuevos_puntos
                 self.lista_puntos.takeItem(index)
@@ -399,7 +409,14 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.path_item = None
         self.path_pen = QtGui.QPen(QtCore.Qt.darkGreen, 4)
         self.recta_apoyo = None
-        self.elements = {}
+        self.elementos = {}
+
+    def init_escena(self):
+        self.creacion_segmento = False
+        self.path = None
+        self.path_item = None
+        self.recta_apoyo = None
+        self.elementos = {}
 
     def mousePressEvent(self, QGraphicsSceneMouseEvent):
         if self.parent.estado == "PUNTO":
@@ -492,21 +509,21 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         x = punto.x
         y = punto.y
 
-        # Dibujo el punto
-        self.addEllipse(x, y, 4, 4, pen, brush)
+        # Dibujo el punto y lo devuelvo
+        return self.addEllipse(x, y, 4, 4, pen, brush)
 
     def dibujar_segmento(self, segmento):
         path = QtGui.QPainterPath(QtCore.QPointF(segmento.puntos[0].x, segmento.puntos[0].y))
         for punto in segmento.puntos[1:]:
             path.lineTo(QtCore.QPointF(punto.x, punto.y))
 
-        # Dibujo el segmento
-        self.addPath(path, pen=self.path_pen)
+        # Dibujo el segmento y lo devuelvo
+        return self.addPath(path, pen=self.path_pen)
 
-    def borrar_elemento(self, elemento):
-        for item in self.items():
-            if item == elemento:
-                self.removeItem(item)
+    def borrar_elemento(self, nombre_elemento):
+        item = self.elementos.get(nombre_elemento)
+        self.removeItem(item)
+        self.elementos.pop(nombre_elemento)
 
 
 if __name__ == "__main__":
