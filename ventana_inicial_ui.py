@@ -17,6 +17,7 @@ class Ui_MainWindow(object):
         self.spin_zoom = QtWidgets.QSpinBox(self.centralwidget)
         self.spin_zoom.setGeometry(QtCore.QRect(810, 80, 91, 31))
         self.spin_zoom.setMaximum(5)
+        self.spin_zoom.setMinimum(1)
         self.spin_zoom.setObjectName("spin_zoom")
         self.label_zoom = QtWidgets.QLabel(self.centralwidget)
         self.label_zoom.setGeometry(QtCore.QRect(740, 80, 51, 31))

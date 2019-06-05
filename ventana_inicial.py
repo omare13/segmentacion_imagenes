@@ -28,6 +28,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lista_puntos.itemClicked.connect(self.resaltar_punto)  # Resaltar punto y no resaltar segmento
         self.lista_segmentos.itemClicked.connect(self.resaltar_segmento)  # Resaltar punto y no resaltar segmento
         self.boton_borrar.clicked.connect(self.borrar_item)  # Borrar un ítem de una de las dos listas
+        self.spin_zoom.valueChanged.connect(self.cambiar_zoom)
         # -------------------
 
         # Menú
@@ -43,7 +44,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.imagen_actual = None  # Un entero que indica la posicion del array de imagenes rango (0, ...)
         self.puntos = None
         self.segmentos = None
-        self.zoom = 0
+        self.zoom = self.spin_zoom.value()
         self.estado = "INIT"  # [INIT, PUNTO, SEGMENTO]
         self.n_puntos = 0
         self.n_segmentos = 0
@@ -336,6 +337,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.n_segmentos = 0
         self.historial = None
         self.resaltado = None
+        self.spin_zoom.setValue(1)
 
     def guardar_grafo(self, ruta_fichero):
         print("GUARDAR GRAFO")
@@ -346,11 +348,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for segmento in self.segmentos:
             trazos_segmento = []
             for punto in segmento.puntos:
-                trazos_segmento.append((math.floor(punto.x), math.floor(punto.y)))  # Coordenadas sin decimales
+                trazos_segmento.append((round(punto.x), round(punto.y)))  # Coordenadas sin decimales
             trazos.append(trazos_segmento)
 
         for punto in self.puntos:
-            trazos.append([(math.floor(punto.x), math.floor(punto.y))])  # Coordenadas sin decimales
+            trazos.append([(round(punto.x), round(punto.y))])  # Coordenadas sin decimales
 
         print(trazos, "TRAZOS")
         print("GENERANDO GRAFO")
@@ -451,6 +453,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.n_segmentos = 0
         else:
             self.n_segmentos = 0
+
+    def cambiar_zoom(self):
+        # Quitar zoom
+        self.frame_edicion.scale(1/self.zoom, 1/self.zoom)
+
+        # Poner zoom
+        self.zoom = self.spin_zoom.value()
+        self.frame_edicion.scale(self.zoom, self.zoom)
 
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
