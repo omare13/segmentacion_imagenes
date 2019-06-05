@@ -52,6 +52,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.historial = []  # Historial de edición para (des|re)hacer
         self.resaltado = None
 
+        # Necesario para los eventos de pulsar tecla en graphicsScene!! De lo contrario, hay que:
+        # 1. Crear una nueva clase que herede de QgraphicsView
+        # 2. Modificar ventana_ui sin incluir QGraphicsView
+        # 3. Configurar QGrpahicsView (evento -> hijo QGraphicsScene))
+        QtTest.QTest.mouseClick(self.frame_edicion, 1)
+
     def nuevo_punto(self):
         if self.imagen_actual is not None:
             print("SELECCIÓN PUNTO")
@@ -532,6 +538,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             self.recta_apoyo = self.addLine(QtCore.QLineF(self.path.currentPosition(), evento.scenePos()))
 
     def keyPressEvent(self, QKeyEvent):
+        print(QKeyEvent.key())
         # TODO - Al pulsar ESCAPE durante la creación de segmento, se finaliza la edición del segmento
         if QKeyEvent.key() == 16777216:  # ESCAPE = 16777216
             print("SE HA PULSADO ESCAPE")
