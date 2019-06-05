@@ -538,23 +538,21 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             self.recta_apoyo = self.addLine(QtCore.QLineF(self.path.currentPosition(), evento.scenePos()))
 
     def keyPressEvent(self, QKeyEvent):
-        print(QKeyEvent.key())
-        # TODO - Al pulsar ESCAPE durante la creación de segmento, se finaliza la edición del segmento
         if QKeyEvent.key() == 16777216:  # ESCAPE = 16777216
-            print("SE HA PULSADO ESCAPE")
+            # Al pulsar ESCAPE durante la creación de segmento, se finaliza la edición del segmento
             if self.parent.estado == "SEGMENTO" and self.path is not None:
                 self.removeItem(self.recta_apoyo)
-                if self.path.length() > 0:
+                if self.path.length() > 1:
                     self.removeItem(self.path_item)
                     self.path_item = self.addPath(self.path, pen=self.path_pen)
                     self.crear_segmento()
 
-            # TODO - Al pulsar ESCAPE después de seleccionar segmento, sin haberlo comenzado, se cancela el comando segmento
+            # Al pulsar ESCAPE después de seleccionar segmento, sin haberlo comenzado, se cancela el comando segmento
             elif self.parent.estado == "SEGMENTO" and self.path is None:
                 self.parent.estado_inicial()
                 self.creacion_segmento = False
 
-            # TODO - Al pulsar ESCAPE después de seleccionar punto, se cancela el comando punto
+            # Al pulsar ESCAPE después de seleccionar punto, se cancela el comando punto
             elif self.parent.estado == "PUNTO":
                 self.parent.estado_inicial()
 
