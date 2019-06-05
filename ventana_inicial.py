@@ -531,6 +531,26 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             print(self.path.currentPosition(), evento.scenePos())
             self.recta_apoyo = self.addLine(QtCore.QLineF(self.path.currentPosition(), evento.scenePos()))
 
+    def keyPressEvent(self, QKeyEvent):
+        # TODO - Al pulsar ESCAPE durante la creación de segmento, se finaliza la edición del segmento
+        if QKeyEvent.key() == 16777216:  # ESCAPE = 16777216
+            print("SE HA PULSADO ESCAPE")
+            if self.parent.estado == "SEGMENTO" and self.path is not None:
+                self.removeItem(self.recta_apoyo)
+                if self.path.length() > 0:
+                    self.removeItem(self.path_item)
+                    self.path_item = self.addPath(self.path, pen=self.path_pen)
+                    self.crear_segmento()
+
+            # TODO - Al pulsar ESCAPE después de seleccionar segmento, sin haberlo comenzado, se cancela el comando segmento
+            elif self.parent.estado == "SEGMENTO" and self.path is None:
+                self.parent.estado_inicial()
+                self.creacion_segmento = False
+
+            # TODO - Al pulsar ESCAPE después de seleccionar punto, se cancela el comando punto
+            elif self.parent.estado == "PUNTO":
+                self.parent.estado_inicial()
+
     def crear_punto(self, evento):
         # Configuro el pincel y la brocha
         pen = QtGui.QPen(QtCore.Qt.black)
@@ -547,6 +567,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
         # Incluyo el punto
         self.parent.add_punto(x, y, elipse)
+        self.update()
 
     def crear_segmento(self):
         print("CREAR SEGMENTO")
@@ -562,6 +583,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.path = None
         self.path_item = None
         self.creacion_segmento = False
+        self.update()
 
     def dibujar_punto(self, punto):
         print("DIBUJAR PUNTO")
@@ -575,6 +597,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
         # Dibujo el punto y lo devuelvo
         elipse = self.addEllipse(x, y, 4, 4, pen, brush)
+        self.update()
         return elipse
 
     def dibujar_segmento(self, segmento):
@@ -585,6 +608,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
         # Dibujo el segmento y lo devuelvo
         path = self.addPath(path, pen=self.path_pen)
+        self.update()
         return path
 
     def borrar_elemento(self, nombre_elemento):
