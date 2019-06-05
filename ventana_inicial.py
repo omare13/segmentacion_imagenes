@@ -159,12 +159,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def cargar_puntos(self):
         print("CARGAR MODELO")
         # Inicializamos/Cargamos los puntos y segmentos que pudieran haber sido guardados previamente
+
+        # Asumismos que existe una carpeta con el mismo nombre de la seleccionada, pero bajo ../ANOTACIONES
         path = self.carpeta
         ocurrencias = [i for i, char in enumerate(path) if char == "/"]
         print(ocurrencias)
         nombre_carpeta = path[ocurrencias[-1]+1:]
         carpeta_anotaciones = path[:ocurrencias[-2]]+"/ANOTACIONES/" + nombre_carpeta + "/"
 
+        # Obtenemos los puntos y los segmentos posiblemente guardados previamente
         fichero_puntos = self.imagenes[self.imagen_actual].nombre+"_puntos.pickle"
         fichero_segmentos = self.imagenes[self.imagen_actual].nombre+"_segmentos.pickle"
 
@@ -185,11 +188,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.segmentos = []
             print("NO SE ENCONTRARON PUNTOS GUARDADOS")
 
+        # Rellenamos las listas de segmentos y puntos
         self.rellenar_listas()
 
     def add_punto(self, coord_x, coord_y, elemento):
         print("AÑADIR PUNTO")
-        # Creo un objeto punto y lo añado al aray de puntos
+
+        # Creo un objeto punto y lo añado al array de puntos
         nombre_punto = "Punto_" + str(self.n_puntos)
         punto = clases.Punto(coord_x, coord_y, nombre_punto)
         self.puntos.append(punto)
@@ -210,10 +215,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_segmento(self, puntos_segmento, elemento):
         print("AÑADIR SEGMENTO")
-        # Creo un objeto segmento y lo añado al aray de segmentos
-        nombre_segmento = "Segmento_" + str(self.n_segmentos)
 
-        # Creo el segmento y lo añado al array de segmentos
+        # Creo un objeto segmento y lo añado al array de segmentos
+        nombre_segmento = "Segmento_" + str(self.n_segmentos)
         segmento = clases.Segmento(puntos_segmento, nombre_segmento)
         self.segmentos.append(segmento)
 
@@ -225,7 +229,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item_segmento = QtWidgets.QListWidgetItem(self.lista_segmentos)
         item_segmento.setText(nombre_segmento)
 
-        # TODO - Añado ítem al historial de ediciones
+        # TODO - Añado el elemento visual del segmento en la lista de elementos visuales
         self.escena.elementos.update({nombre_segmento: elemento})
 
         # Paso al estado inicial
@@ -259,35 +263,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def guardar_imagen(self):
         print("GUARDAR IMAGEN", self.imagen_actual)
 
+        # Obtengo la carpeta correspondiente a la imagen en ../ANOTACIONES
         path = self.carpeta
         ocurrencias = [i for i, char in enumerate(path) if char == "/"]
         print(ocurrencias)
         nombre_carpeta = path[ocurrencias[-1] + 1:]
         carpeta_anotaciones = path[:ocurrencias[-2]] + "/ANOTACIONES/" + nombre_carpeta + "/"
 
+        # Defino los nombres de los ficheros que guardan los puntos y segmentos incluidos
         fichero_puntos = self.imagenes[self.imagen_actual].nombre + "_puntos.pickle"
         fichero_segmentos = self.imagenes[self.imagen_actual].nombre + "_segmentos.pickle"
         print(fichero_puntos)
         print(fichero_segmentos)
 
-
+        # Guardo los arrays de puntos y segmentos en los ficheros para que presistan los datos
         with open(carpeta_anotaciones + fichero_puntos, 'wb') as file:
             pickle.dump(self.puntos, file)
 
         with open(carpeta_anotaciones + fichero_segmentos, 'wb') as file:
             pickle.dump(self.segmentos, file)
 
-        # Los paso a grafo
+        # Genero el grafo de salida usando obtenerGrafo
         fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
         ruta_fichero_grafo = carpeta_anotaciones + fichero_grafo
         self.guardar_grafo(ruta_fichero_grafo)
 
     def desmontar_imagen(self):
+        # Encuentro el elemento en la escena que es de tipo imagen y lo quito
         for item_escena in self.escena.items():
             if type(item_escena) == QtWidgets.QGraphicsPixmapItem:
                 self.escena.removeItem(item_escena)
 
     def vaciar_listas(self):
+        # Vacío los ítems de lista de las listas de segmentos y puntos
         listas = [self.lista_segmentos, self.lista_puntos]
         for lista in listas:
             lista.clear()
@@ -299,12 +307,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             item_punto = QtWidgets.QListWidgetItem(self.lista_puntos)
             item_punto.setText(punto.nombre)
         for segmento in self.segmentos:
-            # Añado el punto a la lista de puntos
+            # Añado el segmento a la lista de segmentos
             print("INCLUIR SEGMENTO EN LISTA DE SEGMENTOS")
-            item_punto = QtWidgets.QListWidgetItem(self.lista_segmentos)
-            item_punto.setText(segmento.nombre)
+            item_segmento = QtWidgets.QListWidgetItem(self.lista_segmentos)
+            item_segmento.setText(segmento.nombre)
 
     def dibujar_puntos(self):
+        """Este método se llama cuando se cargan los datos previamente guardados de una imagen"""
+
+        # Una vez obtenidos los puntos y segmentos, recorro estos arrays y dibujo en la escena sus elementos visuales
         for punto in self.puntos:
             elemento = self.escena.dibujar_punto(punto)
 
@@ -331,49 +342,80 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         trazos = []
 
+        # Creo una lista con los puntos y segmentos del tipo [ [(x,y)], [(x,y),(x,y)] ... ]
         for segmento in self.segmentos:
             trazos_segmento = []
             for punto in segmento.puntos:
-                trazos_segmento.append((math.floor(punto.x), math.floor(punto.y)))
+                trazos_segmento.append((math.floor(punto.x), math.floor(punto.y)))  # Coordenadas sin decimales
             trazos.append(trazos_segmento)
 
         for punto in self.puntos:
-            trazos.append([(math.floor(punto.x), math.floor(punto.y))])
+            trazos.append([(math.floor(punto.x), math.floor(punto.y))])  # Coordenadas sin decimales
 
         print(trazos, "TRAZOS")
-
         print("GENERANDO GRAFO")
         print(trazos, "TRAZOS")
+        # Genero el grafo
         grafo = obtenerGrafo.obtenerGrafo(trazos, 6)
         print("GUARDANDO GRAFO")
+        # Guardo el grafo en .txt
         obtenerGrafo.salvarGrafo(grafo[0], grafo[1], ruta_fichero)
 
     def mostrar_comentario(self):
+        # Obtengo el nombre y el índice del punto o segmento seleccionado
         nombre, index = self.resaltado
         tipo_item = nombre.split("_")[0]
+        # Creo la ventana para el comentario indicando si es segmento o punto y su posición en el array (y lista)
         self.ventana_comentario = CommentWindow(parent=self, tipo_item=tipo_item, index=index)
         self.ventana_comentario.show()
 
     def borrar_item(self):
         print("BORRAR ITEM SELECCIONADO")
+
         if self.resaltado is not None:
+            # Obtengo el nombre y el índice del elemento a borrar
             nombre, index = self.resaltado
+            print("BORRAR ITEM CON INDICE ", index, nombre)
             if "Segmento" in nombre:
+                # Borro el elemento visual de la escena
                 self.escena.borrar_elemento(self.segmentos[index].nombre)
+
+                # Defino el nuevo array de segmentos
                 nuevos_segmentos = [segmento for i, segmento in enumerate(self.segmentos) if i != index]
                 self.segmentos = nuevos_segmentos
+
+                # Elimino el segmento de la lista de segmentos
                 self.lista_segmentos.takeItem(index)
-                print(self.segmentos)
+                print(self.segmentos, "SEGMENTOS DESPUÉS DE BORRADO")
+
+                # Elimno el focus de la lista de segmentos
+                self.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
+
             elif "Punto" in nombre:
+                # Borro el elemento visual de la escena
                 self.escena.borrar_elemento(self.puntos[index].nombre)
+
+                # Obtengo nuevo array de puntos
                 nuevos_puntos = [punto for i, punto in enumerate(self.puntos) if i != index]
                 self.puntos = nuevos_puntos
+
+                # Elimino el punto de la lista de puntos
                 self.lista_puntos.takeItem(index)
                 print(self.puntos)
+                print(self.puntos, "PUNTOS DESPUÉS DE BORRADO")
+
+                # Elimino el focus de la lista de puntos
+                self.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
+
+        self.contar_puntos()
+        self.resaltado = None
 
     def resaltar_punto(self):
+        """Esta función establece cuál es el punto que ha sido seleccionado por última vez"""
+        # Quito el focus de la lista de segmentos para permitir sólo 1 elemento seleccionado a la vez de las 2 listas
         self.lista_segmentos.clearFocus()
         self.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
+        # Obtengo el elemento seleccionado
         self.resaltado = self.lista_puntos.currentItem().text(), self.lista_puntos.currentRow()
         print(self.resaltado)
 
@@ -384,19 +426,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(self.resaltado)
 
     def contar_puntos(self):
+        """Esta función establece cuál es el contador de puntos o segmentos para crear nuevos nombres"""
         print("CONTAR PUNTOS")
         if self.puntos is not None:
-            max = -1
-            for punto in self.puntos:
-                if int(punto.nombre.split("_")[1]) > max:
-                    max = int(punto.nombre.split("_")[1])
-            self.n_puntos = max + 1
+            if len(self.puntos) > 0:
+                max = -1
+                for punto in self.puntos:
+                    if int(punto.nombre.split("_")[1]) > max:
+                        max = int(punto.nombre.split("_")[1])
+                self.n_puntos = max + 1
+            else:
+                self.n_puntos = 0
+        else:
+            self.n_puntos = 0
+
         if self.segmentos is not None:
-            max = -1
-            for segmento in self.segmentos:
-                if int(segmento.nombre.split("_")[1]) > max:
-                    max = int(segmento.nombre.split("_")[1])
-            self.n_puntos = max + 1
+            if len(self.segmentos) > 0:
+                max = -1
+                for segmento in self.segmentos:
+                    if int(segmento.nombre.split("_")[1]) > max:
+                        max = int(segmento.nombre.split("_")[1])
+                self.n_segmentos = max + 1
+            else:
+                self.n_segmentos = 0
+        else:
+            self.n_segmentos = 0
 
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
@@ -500,6 +554,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.creacion_segmento = False
 
     def dibujar_punto(self, punto):
+        print("DIBUJAR PUNTO")
         # Configuro el pincel y la brocha
         pen = QtGui.QPen(QtCore.Qt.black)
         brush = QtGui.QBrush(QtCore.Qt.black)
@@ -513,6 +568,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         return elipse
 
     def dibujar_segmento(self, segmento):
+        print("DIBUJAR SEGMENTO")
         path = QtGui.QPainterPath(QtCore.QPointF(segmento.puntos[0].x, segmento.puntos[0].y))
         for punto in segmento.puntos[1:]:
             path.lineTo(QtCore.QPointF(punto.x, punto.y))
@@ -531,6 +587,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 self.removeItem(item)
                 print("BORRADO")
         self.elementos.pop(nombre_elemento)
+        self.update()
 
 
 if __name__ == "__main__":
