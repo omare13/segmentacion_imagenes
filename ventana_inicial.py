@@ -207,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item_punto = QtWidgets.QListWidgetItem(self.lista_puntos)
         item_punto.setText(nombre_punto)
 
-        # TODO - Añado el elemento visual a la lista de elementos visuales
+        # Añado el elemento visual a la lista de elementos visuales
         self.escena.elementos.update({nombre_punto: elemento})
 
         # Paso al estado inicial
@@ -229,7 +229,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item_segmento = QtWidgets.QListWidgetItem(self.lista_segmentos)
         item_segmento.setText(nombre_segmento)
 
-        # TODO - Añado el elemento visual del segmento en la lista de elementos visuales
+        # Añado el elemento visual del segmento en la lista de elementos visuales
         self.escena.elementos.update({nombre_segmento: elemento})
 
         # Paso al estado inicial
@@ -319,13 +319,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for punto in self.puntos:
             elemento = self.escena.dibujar_punto(punto)
 
-            # TODO - Incluir el elemento en la lista de elementos
+            # Incluir el elemento en la lista de elementos
             self.escena.elementos.update({punto.nombre: elemento})
 
         for segmento in self.segmentos:
             elemento = self.escena.dibujar_segmento(segmento)
 
-            # TODO - Incluir el elemento en la lista de elementos
+            # Incluir el elemento en la lista de elementos
             self.escena.elementos.update({segmento.nombre: elemento})
 
     def reset_modelo(self):
