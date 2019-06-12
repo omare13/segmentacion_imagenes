@@ -425,12 +425,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
         # Obtengo el elemento seleccionado
         self.resaltado = self.lista_puntos.currentItem().text(), self.lista_puntos.currentRow()
+        # Cambio el color del punto seleccionado a rojo
+        nombre, index = self.resaltado
+        self.escena.resaltar_elemento(nombre)
         print(self.resaltado)
 
     def resaltar_segmento(self):
         self.lista_puntos.clearFocus()
         self.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
         self.resaltado = self.lista_segmentos.currentItem().text(), self.lista_segmentos.currentRow()
+        # Cambio el color del punto seleccionado a rojo
+        nombre, index = self.resaltado
+        self.escena.resaltar_elemento(nombre)
         print(self.resaltado)
 
     def contar_puntos(self):
@@ -558,8 +564,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
     def crear_punto(self, evento):
         # Configuro el pincel y la brocha
-        pen = QtGui.QPen(QtCore.Qt.black)
-        brush = QtGui.QBrush(QtCore.Qt.black)
+        pen = QtGui.QPen(QtCore.Qt.darkGreen)
+        brush = QtGui.QBrush(QtCore.Qt.darkGreen)
 
         # Obtengo las coordenadas del evento de click
         x = evento.scenePos().x()
@@ -593,8 +599,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
     def dibujar_punto(self, punto):
         print("DIBUJAR PUNTO")
         # Configuro el pincel y la brocha
-        pen = QtGui.QPen(QtCore.Qt.black)
-        brush = QtGui.QBrush(QtCore.Qt.black)
+        pen = QtGui.QPen(QtCore.Qt.darkGreen)
+        brush = QtGui.QBrush(QtCore.Qt.darkGreen)
 
         # Obtengo las coordenadas del evento de click
         x = punto.x
@@ -627,6 +633,14 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 print("BORRADO")
         self.elementos.pop(nombre_elemento)
         self.update()
+
+    def resaltar_elemento(self, nombre_elemento):
+        elemento_a_resaltar = self.elementos.get(nombre_elemento)
+        print(elemento_a_resaltar, "ITEM A RESALTAR")
+        for item in self.items():
+            if item is elemento_a_resaltar or item == elemento_a_resaltar:
+                print(type(item))
+                item.setBrush(QtGui.QBrush(QtCore.Qt.red))
 
 
 if __name__ == "__main__":
