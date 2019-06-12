@@ -572,7 +572,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         y = evento.scenePos().y()
 
         # Dibujo el punto
-        elipse = self.addEllipse(x, y, 4, 4, pen, brush)
+        elipse = self.addEllipse(x, y, 5, 5, pen, brush)
         print(self.items())
         print("PUNTO DIBUJADO")
 
@@ -607,7 +607,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         y = punto.y
 
         # Dibujo el punto y lo devuelvo
-        elipse = self.addEllipse(x, y, 4, 4, pen, brush)
+        elipse = self.addEllipse(x, y, 5, 5, pen, brush)
         self.update()
         return elipse
 
@@ -638,9 +638,22 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         elemento_a_resaltar = self.elementos.get(nombre_elemento)
         print(elemento_a_resaltar, "ITEM A RESALTAR")
         for item in self.items():
+            if type(item) != QtWidgets.QGraphicsPixmapItem:
+                if item.pen().color() == QtCore.Qt.red:
+                    print("RED")
+                    green_pen = QtGui.QPen(QtCore.Qt.darkGreen)
+                    green_pen.setWidth(4)
+                    item.setPen(green_pen)
+
+        for item in self.items():
             if item is elemento_a_resaltar or item == elemento_a_resaltar:
                 print(type(item))
-                item.setBrush(QtGui.QBrush(QtCore.Qt.red))
+                red_pen = QtGui.QPen(QtCore.Qt.red)
+                if type(item) == QtWidgets.QGraphicsEllipseItem:
+                    red_pen.setWidth(5)
+                else:
+                    red_pen.setWidth(4)
+                item.setPen(red_pen)
 
 
 if __name__ == "__main__":
