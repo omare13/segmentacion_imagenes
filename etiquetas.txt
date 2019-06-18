@@ -1,0 +1,21 @@
+Closing In (general)
+Closing In Adherent
+Closing In Near
+CN
+CN_Tipo 2
+CN_Tipo 3
+DC_Tipo 1
+DC_Tipo 2
+DC_Tipo 3
+DC_Tipo 4
+DC_Tipo 5
+DC_Tipo 6
+DC_Tipo 7
+Micrografía
+Omisión
+Pérdida de perspectiva
+CN_Tipo 1
+CN_Tipo 5
+DC_all
+DPV_Tipo 1
+P_Tipo 2.C1

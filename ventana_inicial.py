@@ -23,13 +23,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.boton_editar.clicked.connect(self.nuevo_segmento)  # Botón nuevo segmento
         self.boton_previo.clicked.connect(self.imagen_previa)  # Botón de imagen previa
         self.boton_siguiente.clicked.connect(self.imagen_siguiente)  # Botón de imagen siguiente
-        self.lista_puntos.itemDoubleClicked.connect(self.mostrar_comentario)  # Doble click en un punto -> comentario
-        self.lista_segmentos.itemDoubleClicked.connect(self.mostrar_comentario)  # Doble click en un segm -> comentario
+        self.lista_puntos.itemDoubleClicked.connect(self.mostrar_comentario_punto)  # Doble click en un punto -> comentario
+        self.lista_segmentos.itemDoubleClicked.connect(self.mostrar_comentario_segmento)  # Doble click en un segm -> comentario
         self.lista_puntos.itemClicked.connect(self.resaltar_punto)  # Resaltar punto y no resaltar segmento
         self.lista_segmentos.itemClicked.connect(self.resaltar_segmento)  # Resaltar segmento y no resaltar punto
         self.boton_borrar.clicked.connect(self.borrar_item)  # Borrar un ítem de una de las dos listas
         self.spin_zoom.valueChanged.connect(self.cambiar_zoom)
         # -------------------
+
+        # Add etiquetas
+        fichero_etiquetas = QtCore.QFile("etiquetas.txt")
+        fichero_etiquetas.open(QtCore.QIODevice.ReadOnly)
+
+        self.etiquetas = []
+        with open("etiquetas.txt", "r", encoding="UTF-8") as fichero_etiquetas:
+            etiquetas = fichero_etiquetas.readlines()
+            for etiqueta in etiquetas:
+                print(etiqueta)
+                etiqueta_limpia = etiqueta.replace("\n", "")
+                print(etiqueta_limpia)
+                self.combobox_editar.addItem(etiqueta_limpia)
+                self.etiquetas.append(etiqueta_limpia)
+        # -------------
 
         # Menú
         self.actionAbrir_Imagen.triggered.connect(self.abrir_imagen)
@@ -51,6 +66,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.historial = []  # Historial de edición para (des|re)hacer
         self.resaltado = None
+        self.tipo_resaltado = None
 
         # Necesario para los eventos de pulsar tecla en graphicsScene!! De lo contrario, hay que:
         # 1. Crear una nueva clase que herede de QgraphicsView
@@ -210,7 +226,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Creo un objeto punto y lo añado al array de puntos
         nombre_punto = "Punto_" + str(self.n_puntos)
-        punto = clases.Punto(coord_x, coord_y, nombre_punto)
+        punto = clases.Punto(coord_x, coord_y, nombre_punto, self.combobox_editar.currentText())
         self.puntos.append(punto)
 
         # Aumento el contador de puntos para variar los nombres
@@ -219,7 +235,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Añado el punto a la lista de puntos
         print("INCLUIR PUNTO EN LISTA DE PUNTOS")
         item_punto = QtWidgets.QListWidgetItem(self.lista_puntos)
-        item_punto.setText(nombre_punto)
+        item_punto.setText(punto.titulo)
 
         # Añado el elemento visual a la lista de elementos visuales
         self.escena.elementos.update({nombre_punto: elemento})
@@ -232,7 +248,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Creo un objeto segmento y lo añado al array de segmentos
         nombre_segmento = "Segmento_" + str(self.n_segmentos)
-        segmento = clases.Segmento(puntos_segmento, nombre_segmento)
+        segmento = clases.Segmento(puntos_segmento, nombre_segmento, self.combobox_editar.currentText())
         self.segmentos.append(segmento)
 
         # Aumento el contador de segmentos para variar los nombres
@@ -241,7 +257,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Añado el segmento a la lista de segmentos
         print("INCLUIR SEGMENTO EN LISTA DE SEGMENTOS")
         item_segmento = QtWidgets.QListWidgetItem(self.lista_segmentos)
-        item_segmento.setText(nombre_segmento)
+        item_segmento.setText(segmento.titulo)
 
         # Añado el elemento visual del segmento en la lista de elementos visuales
         self.escena.elementos.update({nombre_segmento: elemento})
@@ -315,32 +331,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             lista.clear()
 
     def rellenar_listas(self):
-        for punto in self.puntos:
-            # Añado el punto a la lista de puntos
-            print("INCLUIR PUNTO EN LISTA DE PUNTOS")
-            item_punto = QtWidgets.QListWidgetItem(self.lista_puntos)
-            item_punto.setText(punto.nombre)
-        for segmento in self.segmentos:
-            # Añado el segmento a la lista de segmentos
-            print("INCLUIR SEGMENTO EN LISTA DE SEGMENTOS")
-            item_segmento = QtWidgets.QListWidgetItem(self.lista_segmentos)
-            item_segmento.setText(segmento.nombre)
+        if self.puntos is not None:
+            for punto in self.puntos:
+                # Añado el punto a la lista de puntos
+                print("INCLUIR PUNTO EN LISTA DE PUNTOS")
+                item_punto = QtWidgets.QListWidgetItem(self.lista_puntos)
+                item_punto.setText(punto.titulo)
+        if self.segmentos is not None:
+            for segmento in self.segmentos:
+                # Añado el segmento a la lista de segmentos
+                print("INCLUIR SEGMENTO EN LISTA DE SEGMENTOS")
+                item_segmento = QtWidgets.QListWidgetItem(self.lista_segmentos)
+                item_segmento.setText(segmento.titulo)
 
     def dibujar_puntos(self):
         """Este método se llama cuando se cargan los datos previamente guardados de una imagen"""
 
         # Una vez obtenidos los puntos y segmentos, recorro estos arrays y dibujo en la escena sus elementos visuales
-        for punto in self.puntos:
-            elemento = self.escena.dibujar_punto(punto)
+        if self.puntos is not None:
+            for punto in self.puntos:
+                elemento = self.escena.dibujar_punto(punto)
 
-            # Incluir el elemento en la lista de elementos
-            self.escena.elementos.update({punto.nombre: elemento})
+                # Incluir el elemento en la lista de elementos
+                self.escena.elementos.update({punto.nombre: elemento})
 
-        for segmento in self.segmentos:
-            elemento = self.escena.dibujar_segmento(segmento)
+        if self.segmentos is not None:
+            for segmento in self.segmentos:
+                elemento = self.escena.dibujar_segmento(segmento)
 
-            # Incluir el elemento en la lista de elementos
-            self.escena.elementos.update({segmento.nombre: elemento})
+                # Incluir el elemento en la lista de elementos
+                self.escena.elementos.update({segmento.nombre: elemento})
 
     def reset_modelo(self):
         self.estado = "INIT"
@@ -350,6 +370,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.n_segmentos = 0
         self.historial = None
         self.resaltado = None
+        self.tipo_resaltado = None
         self.spin_zoom.setValue(1)
 
     def guardar_grafo(self, ruta_fichero):
@@ -358,14 +379,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         trazos = []
 
         # Creo una lista con los puntos y segmentos del tipo [ [(x,y)], [(x,y),(x,y)] ... ]
-        for segmento in self.segmentos:
-            trazos_segmento = []
-            for punto in segmento.puntos:
-                trazos_segmento.append((round(punto.x), round(punto.y)))  # Coordenadas sin decimales
-            trazos.append(trazos_segmento)
+        if self.segmentos is not None:
+            for segmento in self.segmentos:
+                trazos_segmento = []
+                for punto in segmento.puntos:
+                    trazos_segmento.append((round(punto.x), round(punto.y)))  # Coordenadas sin decimales
+                trazos.append(trazos_segmento)
 
-        for punto in self.puntos:
-            trazos.append([(round(punto.x), round(punto.y))])  # Coordenadas sin decimales
+        if self.puntos is not None:
+            for punto in self.puntos:
+                trazos.append([(round(punto.x), round(punto.y))])  # Coordenadas sin decimales
 
         print(trazos, "TRAZOS")
         print("GENERANDO GRAFO")
@@ -376,12 +399,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Guardo el grafo en .txt
         obtenerGrafo.salvarGrafo(grafo[0], grafo[1], ruta_fichero)
 
-    def mostrar_comentario(self):
+    def mostrar_comentario_punto(self):
         # Obtengo el nombre y el índice del punto o segmento seleccionado
-        nombre, index = self.resaltado
-        tipo_item = nombre.split("_")[0]
+        titulo, index = self.resaltado
         # Creo la ventana para el comentario indicando si es segmento o punto y su posición en el array (y lista)
-        self.ventana_comentario = CommentWindow(parent=self, tipo_item=tipo_item, index=index)
+        self.ventana_comentario = CommentWindow(parent=self, tipo_item="Punto", index=index)
+        self.ventana_comentario.show()
+
+    def mostrar_comentario_segmento(self):
+        # Obtengo el nombre y el índice del punto o segmento seleccionado
+        titulo, index = self.resaltado
+        # Creo la ventana para el comentario indicando si es segmento o punto y su posición en el array (y lista)
+        self.ventana_comentario = CommentWindow(parent=self, tipo_item="Segmento", index=index)
         self.ventana_comentario.show()
 
     def borrar_item(self):
@@ -390,8 +419,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.resaltado is not None:
             # Obtengo el nombre y el índice del elemento a borrar
             nombre, index = self.resaltado
-            print("BORRAR ITEM CON INDICE ", index, nombre)
-            if "Segmento" in nombre:
+            print(index)
+
+            if self.tipo_resaltado == "Segmento":
                 # Borro el elemento visual de la escena
                 self.escena.borrar_elemento(self.segmentos[index].nombre)
 
@@ -406,7 +436,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Elimno el focus de la lista de segmentos
                 self.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
 
-            elif "Punto" in nombre:
+            elif self.tipo_resaltado == "Punto":
                 # Borro el elemento visual de la escena
                 self.escena.borrar_elemento(self.puntos[index].nombre)
 
@@ -424,6 +454,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.contar_puntos()
         self.resaltado = None
+        self.tipo_resaltado = None
 
     def resaltar_punto(self):
         """Esta función establece cuál es el punto que ha sido seleccionado por última vez"""
@@ -432,8 +463,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
         # Obtengo el elemento seleccionado
         self.resaltado = self.lista_puntos.currentItem().text(), self.lista_puntos.currentRow()
+        self.tipo_resaltado = "Punto"
         # Cambio el color del punto seleccionado a rojo
-        nombre, index = self.resaltado
+        titulo, index = self.resaltado
+        nombre = self.puntos[index].nombre
         self.escena.resaltar_elemento(nombre)
         print(self.resaltado)
 
@@ -441,8 +474,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lista_puntos.clearFocus()
         self.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
         self.resaltado = self.lista_segmentos.currentItem().text(), self.lista_segmentos.currentRow()
+        self.tipo_resaltado = "Segmento"
         # Cambio el color del punto seleccionado a rojo
-        nombre, index = self.resaltado
+        titulo, index = self.resaltado
+        nombre = self.segmentos[index].nombre
         self.escena.resaltar_elemento(nombre)
         print(self.resaltado)
 
@@ -481,6 +516,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoom = self.spin_zoom.value()
         self.frame_edicion.scale(self.zoom, self.zoom)
 
+    def closeEvent(self, *args, **kwargs):
+        """Guarda las etiquetas nuevas introducidas en la sesión"""
+
+        # Busco nuevas etiquetas
+        for i in range(self.combobox_editar.count()):
+            etiqueta = self.combobox_editar.itemText(i)
+            if etiqueta not in self.etiquetas:
+                self.etiquetas.append(etiqueta)
+
+        # Guardo etiquetas en fichero
+        with open("etiquetas.txt", "w", encoding="UTF-8") as fichero_etiquetas:
+            for etiqueta in self.etiquetas[:-1]:
+                fichero_etiquetas.write(etiqueta + "\n")
+            fichero_etiquetas.write(self.etiquetas[-1])
+
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
     def __init__(self, parent=None):
@@ -501,6 +551,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.recta_apoyo = None
         self.punto_final = None
         self.elementos = {}
+        self.clear()
 
     def mousePressEvent(self, QGraphicsSceneMouseEvent):
         if self.parent.estado == "SEGMENTO":
@@ -539,6 +590,17 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 self.path_item = self.addPath(self.path, pen=self.path_pen)
                 self.crear_segmento()
 
+        else:
+            if len(self.elementos.keys()) > 0:
+                for nombre, valor in self.elementos.items():
+                    if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
+                        print("CLICK ON ME", nombre, valor)
+                        if type(valor) == QtWidgets.QGraphicsPathItem:
+                            self.resaltar_elemento(nombre)
+
+                        elif type(valor) == QtWidgets.QGraphicsEllipseItem:
+                            self.resaltar_elemento(nombre)
+
     def mouseMoveEvent(self, evento):
         print("MOUSE MOVE")
         if (self.parent.estado == "SEGMENTO") and (self.creacion_segmento is True):
@@ -574,6 +636,29 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             elif self.parent.estado == "SEGMENTO" and self.path is None:
                 self.parent.estado_inicial()
                 self.creacion_segmento = False
+
+    def mouseDoubleClickEvent(self, QGraphicsSceneMouseEvent):
+        # Si hay elementos en la escena
+        if len(self.elementos.keys()) > 0:
+            for nombre, valor in self.elementos.items():
+                if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
+                    print("D-CLICK ON ME", nombre, valor)
+
+                    if type(valor) == QtWidgets.QGraphicsPathItem:
+                        index = int(re.split("_", nombre)[1])
+                        self.parent.resaltado = nombre, index
+                        self.parent.tipo_resaltado = "Segmento"
+                        self.resaltar_elemento(nombre)
+                        self.parent.mostrar_comentario_segmento()
+                        self.parent.lista_segmentos.setCurrentIndex(index)
+
+                    elif type(valor) == QtWidgets.QGraphicsEllipseItem:
+                        index = int(re.split("_", nombre)[1])
+                        self.parent.resaltado = nombre, index
+                        self.parent.tipo_resaltado = "Punto"
+                        self.resaltar_elemento(nombre)
+                        self.parent.mostrar_comentario_punto()
+                        self.parent.lista_puntos.setCurrentIndex(index)
 
     def crear_punto(self, evento):
         # Configuro el pincel y la brocha
