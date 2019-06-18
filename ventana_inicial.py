@@ -7,6 +7,7 @@ import clases
 import pickle
 import obtenerGrafo
 import math
+import sys
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -657,7 +658,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
+    app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
     try:
