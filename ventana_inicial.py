@@ -20,14 +20,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.frame_edicion.setScene(self.escena)
 
         # Botones --> acciones
-        self.boton_punto.clicked.connect(self.nuevo_punto)  # Botón nuevo punto
-        self.boton_segmento.clicked.connect(self.nuevo_segmento)  # Botón nuevo segmento
+        self.boton_editar.clicked.connect(self.nuevo_segmento)  # Botón nuevo segmento
         self.boton_previo.clicked.connect(self.imagen_previa)  # Botón de imagen previa
         self.boton_siguiente.clicked.connect(self.imagen_siguiente)  # Botón de imagen siguiente
         self.lista_puntos.itemDoubleClicked.connect(self.mostrar_comentario)  # Doble click en un punto -> comentario
         self.lista_segmentos.itemDoubleClicked.connect(self.mostrar_comentario)  # Doble click en un segm -> comentario
         self.lista_puntos.itemClicked.connect(self.resaltar_punto)  # Resaltar punto y no resaltar segmento
-        self.lista_segmentos.itemClicked.connect(self.resaltar_segmento)  # Resaltar punto y no resaltar segmento
+        self.lista_segmentos.itemClicked.connect(self.resaltar_segmento)  # Resaltar segmento y no resaltar punto
         self.boton_borrar.clicked.connect(self.borrar_item)  # Borrar un ítem de una de las dos listas
         self.spin_zoom.valueChanged.connect(self.cambiar_zoom)
         # -------------------
@@ -46,7 +45,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.puntos = None
         self.segmentos = None
         self.zoom = self.spin_zoom.value()
-        self.estado = "INIT"  # [INIT, PUNTO, SEGMENTO]
+        self.estado = "INIT"  # [INIT, SEGMENTO]
         self.n_puntos = 0
         self.n_segmentos = 0
 
@@ -58,16 +57,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # 2. Modificar ventana_ui sin incluir QGraphicsView
         # 3. Configurar QGrpahicsView (evento -> hijo QGraphicsScene))
         QtTest.QTest.mouseClick(self.frame_edicion, 1)
-
-    def nuevo_punto(self):
-        if self.imagen_actual is not None:
-            print("SELECCIÓN PUNTO")
-
-            # Cambio la forma del cursor del frame de edición
-            self.frame_edicion.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
-
-            # El estado es PUNTO
-            self.estado = "PUNTO"
 
     def nuevo_segmento(self):
         if self.imagen_actual is not None:
@@ -81,6 +70,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def abrir_carpeta(self):
         print("ABRIR CARPETA")
+
+        # Si ya hay una imagen cargada, se desmonta
+        if self.imagen_actual is not None:
+            self.guardar_imagen()
+            self.desmontar_imagen()
+            self.reset_modelo()
+            self.vaciar_listas()
+            self.escena.init_escena()
+
         # Variable de control qué formatos peuden tener?
         formatos_validos = [".jpg", ".bmp", ".gif"]
         # https://www.riverbankcomputing.com/static/Docs/PyQt5/api/qtgui/qpixmap.html?highlight=qpixmap#reading-and-writing-image-files
@@ -115,6 +113,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def abrir_imagen(self):
         print(self.imagen_actual)
         print("ABRIR IMAGEN")
+
+        # Si ya hay una imagen cargada, se desmonta
+        if self.imagen_actual is not None:
+            self.guardar_imagen()
+            self.desmontar_imagen()
+            self.reset_modelo()
+            self.vaciar_listas()
+            self.escena.init_escena()
 
         # Diálogo de selección de imagen
         ruta_imagen = str(QtWidgets.QFileDialog.getOpenFileName(self, caption="Seleccionar imagen",
@@ -485,6 +491,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.path_item = None
         self.path_pen = QtGui.QPen(QtCore.Qt.darkGreen, 4)
         self.recta_apoyo = None
+        self.punto_final = None
         self.elementos = {}
 
     def init_escena(self):
@@ -492,27 +499,26 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.path = None
         self.path_item = None
         self.recta_apoyo = None
+        self.punto_final = None
         self.elementos = {}
 
     def mousePressEvent(self, QGraphicsSceneMouseEvent):
-        if self.parent.estado == "PUNTO":
-            self.crear_punto(QGraphicsSceneMouseEvent)
-
-        elif self.parent.estado == "SEGMENTO":
+        if self.parent.estado == "SEGMENTO":
             # Si se indica la opción segmento pero se hace click derecho (botón número 2), entonces se crea un punto
             if (QGraphicsSceneMouseEvent.button() == 2) and (self.creacion_segmento is False):
                 self.crear_punto(QGraphicsSceneMouseEvent)
 
             # Si se indica opción segmento y se hace click izqdo(botón 1) por 1ª vez, entramos en creación de segmento
             elif (QGraphicsSceneMouseEvent.button() == 1) and (self.creacion_segmento is False):
-                self.removeItem(self.recta_apoyo)
+                # self.removeItem(self.recta_apoyo)
                 print("PUNTO INICIAL DEL SEGMENTO")
                 # Indicamos que actualmente se está creando un segmento
                 self.creacion_segmento = True
                 # Incluimos el punto inicial al path
                 self.path = QtGui.QPainterPath(QGraphicsSceneMouseEvent.scenePos())
-                print(self.path.isEmpty())
+                print("PATH VACÍO? ", self.path.isEmpty())
                 self.path_item = self.addPath(self.path, pen=self.path_pen)
+                self.punto_final = QGraphicsSceneMouseEvent.scenePos()
                 print(self.items())
 
             # Si estamos en creación de segmento y se hace click izquierdo, generamos el path desde el punto anterior
@@ -543,25 +549,31 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             print("CREAR RECTA APOYO")
             print(self.path.currentPosition(), evento.scenePos())
             self.recta_apoyo = self.addLine(QtCore.QLineF(self.path.currentPosition(), evento.scenePos()))
+            self.update()
 
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == 16777216:  # ESCAPE = 16777216
-            # Al pulsar ESCAPE durante la creación de segmento, se finaliza la edición del segmento
+            # Al pulsar ESCAPE durante la creación de segmento...
             if self.parent.estado == "SEGMENTO" and self.path is not None:
+                print("PATH ES ", self.path, self.path.length())
                 self.removeItem(self.recta_apoyo)
-                if self.path.length() > 1:
+                # Si el path incluye más de un punto, se finaliza la edición del segmento
+                if self.path.length() > float(0):
+                    print("SEGMENTO FINAL ESCAPE")
                     self.removeItem(self.path_item)
                     self.path_item = self.addPath(self.path, pen=self.path_pen)
                     self.crear_segmento()
+                # Si el path incluye un solo punto, se ha creado un punto
+                elif self.path.length() == float(0):
+                    print("COORDS", self.punto_final.x(), self.punto_final.y())
+                    print("PUNTO FINAL ESCAPE")
+                    self.crear_punto_coord(self.punto_final.x(), self.punto_final.y())
+                    self.removeItem(self.path_item)
 
             # Al pulsar ESCAPE después de seleccionar segmento, sin haberlo comenzado, se cancela el comando segmento
             elif self.parent.estado == "SEGMENTO" and self.path is None:
                 self.parent.estado_inicial()
                 self.creacion_segmento = False
-
-            # Al pulsar ESCAPE después de seleccionar punto, se cancela el comando punto
-            elif self.parent.estado == "PUNTO":
-                self.parent.estado_inicial()
 
     def crear_punto(self, evento):
         # Configuro el pincel y la brocha
@@ -581,6 +593,34 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.parent.add_punto(x, y, elipse)
         self.update()
 
+        # Elimino las variables de manejo del path
+        self.path = None
+        self.path_item = None
+        self.creacion_segmento = False
+        self.punto_final = None
+        self.update()
+
+    def crear_punto_coord(self, coord_x, coord_y):
+        # Configuro el pincel y la brocha
+        pen = QtGui.QPen(QtCore.Qt.darkGreen)
+        brush = QtGui.QBrush(QtCore.Qt.darkGreen)
+
+        # Dibujo el punto
+        elipse = self.addEllipse(coord_x, coord_y, 5, 5, pen, brush)
+        print(self.items())
+        print("PUNTO DIBUJADO")
+
+        # Incluyo el punto
+        self.parent.add_punto(coord_x, coord_y, elipse)
+        self.update()
+
+        # Elimino las variables de manejo del path
+        self.path = None
+        self.path_item = None
+        self.creacion_segmento = False
+        self.punto_final = None
+        self.update()
+
     def crear_segmento(self):
         print("CREAR SEGMENTO")
         print(self)
@@ -595,6 +635,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.path = None
         self.path_item = None
         self.creacion_segmento = False
+        self.punto_final = None
         self.update()
 
     def dibujar_punto(self, punto):
@@ -661,7 +702,4 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    try:
-        app.exec_()
-    except:
-        pass
+    app.exec_()
