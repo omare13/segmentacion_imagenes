@@ -21,7 +21,7 @@ class CommentWindow(QtWidgets.QDialog, Ui_ventana_comentario):
             self.texto_comentario.setPlainText(self.dato.comentario)
 
         # Mostrar título
-        self.lineEdit.setText(self.dato.titulo[(self.dato.titulo.find(":") + 1):])
+        self.lineEdit.setText(self.dato.titulo[(self.dato.titulo.find(":") + 1):].strip())
 
         # Botones --> acciones
         self.boton_cancelar.clicked.connect(self.cancelar_comentario)  # Botón cancelar edición comentario
