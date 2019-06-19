@@ -50,6 +50,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionAbrir_Carpeta.triggered.connect(self.abrir_carpeta)
         self.actionGuardar.triggered.connect(self.guardar_imagen)
         self.actionAcerca_de.triggered.connect(self.mostrar_info)
+        self.actionManual.triggered.connect(self.mostrar_manual)
 
         # Ventana comentario
         self.ventana_comentario = None
@@ -544,6 +545,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         "UNED 2019 ©")
         mensaje.setStandardButtons(QtWidgets.QMessageBox.Ok)
         mensaje.exec_()
+
+    def mostrar_manual(self):
+        # https://stackoverflow.com/questions/40905703/how-to-open-an-html-file-in-the-browser-from-python/40905794
+        import webbrowser
+        url = "manual.html"
+        webbrowser.open(url, new=2)
 
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
