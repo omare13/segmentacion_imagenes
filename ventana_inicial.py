@@ -34,7 +34,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Add etiquetas
         fichero_etiquetas = QtCore.QFile("etiquetas.txt")
         fichero_etiquetas.open(QtCore.QIODevice.ReadOnly)
-
         self.etiquetas = []
         with open("etiquetas.txt", "r", encoding="UTF-8") as fichero_etiquetas:
             etiquetas = fichero_etiquetas.readlines()
@@ -50,6 +49,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionAbrir_Imagen.triggered.connect(self.abrir_imagen)
         self.actionAbrir_Carpeta.triggered.connect(self.abrir_carpeta)
         self.actionGuardar.triggered.connect(self.guardar_imagen)
+        self.actionAcerca_de.triggered.connect(self.mostrar_info)
 
         # Ventana comentario
         self.ventana_comentario = None
@@ -64,12 +64,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.n_puntos = 0
         self.n_segmentos = 0
 
-        self.historial = []  # Historial de edición para (des|re)hacer
+        # Control de los elementos seleccionados (resaltados) sea en lista o en escena
         self.resaltado = None
         self.tipo_resaltado = None
 
         # Necesario para los eventos de pulsar tecla en graphicsScene!! De lo contrario, hay que:
-        # 1. Crear una nueva clase que herede de QgraphicsView
+        # 1. Crear una nueva clase que herede de QGraphicsView
         # 2. Modificar ventana_ui sin incluir QGraphicsView
         # 3. Configurar QGrpahicsView (evento -> hijo QGraphicsScene))
         QtTest.QTest.mouseClick(self.frame_edicion, 1)
@@ -100,7 +100,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # https://www.riverbankcomputing.com/static/Docs/PyQt5/api/qtgui/qpixmap.html?highlight=qpixmap#reading-and-writing-image-files
 
         # Diálogo de selección de carpeta
-        self.carpeta = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Seleccionar fichero"))
+        # self.carpeta = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Seleccionar fichero"))
+        self.carpeta = str(
+            QtWidgets.QFileDialog.getExistingDirectory(self, "Seleccionar fichero", QtCore.QDir.currentPath(),
+                                                       QtWidgets.QFileDialog.ShowDirsOnly))
         if len(self.carpeta) > 0:
             print("CARPETA SELECCIONADA", self.carpeta)
 
@@ -266,7 +269,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.estado_inicial()
 
     def imagen_previa(self):
-        if self.imagen_actual > 0:
+        if self.imagen_actual is not None and self.imagen_actual > 0:
             self.guardar_imagen()
             self.desmontar_imagen()
             self.reset_modelo()
@@ -276,7 +279,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cargar_imagen()
 
     def imagen_siguiente(self):
-        if self.imagen_actual < (len(self.imagenes) - 1):
+        if self.imagen_actual is not None and self.imagen_actual < (len(self.imagenes) - 1):
             self.guardar_imagen()
             self.desmontar_imagen()
             self.reset_modelo()
@@ -530,6 +533,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for etiqueta in self.etiquetas[:-1]:
                 fichero_etiquetas.write(etiqueta + "\n")
             fichero_etiquetas.write(self.etiquetas[-1])
+
+    def mostrar_info(self):
+        """Para mostrar la ventana en "Acerca de" """
+        mensaje = QtWidgets.QMessageBox(self)
+        mensaje.setIcon(QtWidgets.QMessageBox.Information)
+        mensaje.setWindowTitle("Información")
+        mensaje.setText("Desarrollado en el Departamento de Ingeligencia Artificial\n\n"
+                        "Escuela Técnica Superior de Informática\n\n"
+                        "UNED 2019 ©")
+        mensaje.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        mensaje.exec_()
 
 
 class MyGraphicsScene(QtWidgets.QGraphicsScene):
