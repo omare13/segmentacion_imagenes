@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>646</width>
+    <width>861</width>
     <height>682</height>
    </rect>
   </property>
@@ -49,6 +49,9 @@
           <property name="text">
            <string>Editar</string>
           </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -68,26 +71,9 @@
           <property name="editable">
            <bool>true</bool>
           </property>
-          <item>
-           <property name="text">
-            <string>A</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>B</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>V</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>D</string>
-           </property>
-          </item>
+          <property name="currentText">
+           <string/>
+          </property>
          </widget>
         </item>
         <item>
@@ -202,7 +188,11 @@
        </layout>
       </item>
       <item>
-       <widget class="QGraphicsView" name="frame_edicion"/>
+       <widget class="QGraphicsView" name="frame_edicion">
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -411,7 +401,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>646</width>
+     <width>861</width>
      <height>26</height>
     </rect>
    </property>

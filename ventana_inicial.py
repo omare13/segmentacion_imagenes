@@ -6,7 +6,7 @@ import re
 import clases
 import pickle
 import obtenerGrafo
-import math
+from PyQt5 import QtGui, QtTest
 import sys
 
 
@@ -84,6 +84,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # El estado es SEGMENTO
             self.estado = "SEGMENTO"
+
+            print("BOTON EDITAR PULSADO?", self.boton_editar.isChecked())
 
     def abrir_carpeta(self):
         print("ABRIR CARPETA")
@@ -579,6 +581,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             # Si se indica la opción segmento pero se hace click derecho (botón número 2), entonces se crea un punto
             if (QGraphicsSceneMouseEvent.button() == 2) and (self.creacion_segmento is False):
                 self.crear_punto(QGraphicsSceneMouseEvent)
+                print("QUITAR CHECKED!")
+                self.parent.boton_editar.setChecked(False)
 
             # Si se indica opción segmento y se hace click izqdo(botón 1) por 1ª vez, entramos en creación de segmento
             elif (QGraphicsSceneMouseEvent.button() == 1) and (self.creacion_segmento is False):
@@ -610,13 +614,18 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 self.removeItem(self.path_item)
                 self.path_item = self.addPath(self.path, pen=self.path_pen)
                 self.crear_segmento()
-
+                print("QUITAR CHECKED!")
+                self.parent.boton_editar.setChecked(False)
         else:
+            encontrado = False
             if len(self.elementos.keys()) > 0:
+                stroker = QtGui.QPainterPathStroker()
+                stroker.setWidth(5)
                 for nombre, valor in self.elementos.items():
-                    if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
-                        print("CLICK ON ME", nombre, valor)
-                        if type(valor) == QtWidgets.QGraphicsPathItem:
+                    if type(valor) == QtWidgets.QGraphicsPathItem:
+                        stroke = stroker.createStroke(valor.path())
+                        if stroke.contains(QGraphicsSceneMouseEvent.scenePos()):
+                            encontrado = True
                             self.resaltar_elemento(nombre)
                             for i, segmento in enumerate(self.parent.segmentos):
                                 if segmento.nombre == nombre:
@@ -625,16 +634,33 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
                                     self.parent.resaltado = segmento.titulo, i
                                     self.parent.tipo_resaltado = "Segmento"
-
-                        elif type(valor) == QtWidgets.QGraphicsEllipseItem:
+                            break
+                    elif type(valor) == QtWidgets.QGraphicsEllipseItem:
+                        if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
+                            encontrado = True
                             self.resaltar_elemento(nombre)
                             for i, punto in enumerate(self.parent.puntos):
                                 if punto.nombre == nombre:
                                     self.parent.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
                                     self.parent.lista_puntos.setCurrentRow(i)
-
                                     self.parent.resaltado = punto.titulo, i
                                     self.parent.tipo_resaltado = "Punto"
+                            break
+                if not encontrado:
+                    for item in self.items():
+                        if type(item) != QtWidgets.QGraphicsPixmapItem:
+                            if item.pen().color() == QtCore.Qt.red:
+                                print("RED")
+                                green_pen = QtGui.QPen(QtCore.Qt.darkGreen)
+                                green_pen.setWidth(3)
+                                if type(item) == QtWidgets.QGraphicsEllipseItem:
+                                    green_brush = QtGui.QBrush(QtCore.Qt.darkGreen)
+                                    item.setBrush(green_brush)
+                                    green_pen.setWidth(2)
+                                item.setPen(green_pen)
+
+                    self.parent.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
+                    self.parent.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
 
     def mouseMoveEvent(self, evento):
         print("MOUSE MOVE")
@@ -666,20 +692,26 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                     print("PUNTO FINAL ESCAPE")
                     self.crear_punto_coord(self.punto_final.x(), self.punto_final.y())
                     self.removeItem(self.path_item)
+                print("QUITAR CHECKED!")
+                self.parent.boton_editar.setChecked(False)
 
             # Al pulsar ESCAPE después de seleccionar segmento, sin haberlo comenzado, se cancela el comando segmento
             elif self.parent.estado == "SEGMENTO" and self.path is None:
                 self.parent.estado_inicial()
                 self.creacion_segmento = False
+                print("QUITAR CHECKED!")
+                self.parent.boton_editar.setChecked(False)
 
     def mouseDoubleClickEvent(self, QGraphicsSceneMouseEvent):
         # Si hay elementos en la escena
         if len(self.elementos.keys()) > 0:
-            for nombre, valor in self.elementos.items():
-                if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
-                    print("D-CLICK ON ME", nombre, valor)
+            stroker = QtGui.QPainterPathStroker()
+            stroker.setWidth(5)
 
-                    if type(valor) == QtWidgets.QGraphicsPathItem:
+            for nombre, valor in self.elementos.items():
+                if type(valor) == QtWidgets.QGraphicsPathItem:
+                    stroke = stroker.createStroke(valor.path())
+                    if stroke.contains(QGraphicsSceneMouseEvent.scenePos()):
                         index = int(re.split("_", nombre)[1])
                         self.parent.resaltado = nombre, index
                         self.parent.tipo_resaltado = "Segmento"
@@ -688,7 +720,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                         self.parent.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
                         self.parent.lista_segmentos.setCurrentRow(index)
 
-                    elif type(valor) == QtWidgets.QGraphicsEllipseItem:
+                elif type(valor) == QtWidgets.QGraphicsEllipseItem:
+                    if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
                         index = int(re.split("_", nombre)[1])
                         self.parent.resaltado = nombre, index
                         self.parent.tipo_resaltado = "Punto"
@@ -806,17 +839,23 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 if item.pen().color() == QtCore.Qt.red:
                     print("RED")
                     green_pen = QtGui.QPen(QtCore.Qt.darkGreen)
-                    green_pen.setWidth(4)
+                    green_pen.setWidth(3)
+                    if type(item) == QtWidgets.QGraphicsEllipseItem:
+                        green_brush = QtGui.QBrush(QtCore.Qt.darkGreen)
+                        item.setBrush(green_brush)
+                        green_pen.setWidth(2)
                     item.setPen(green_pen)
 
         for item in self.items():
             if item is elemento_a_resaltar or item == elemento_a_resaltar:
                 print(type(item))
                 red_pen = QtGui.QPen(QtCore.Qt.red)
+                red_brush = QtGui.QBrush(QtCore.Qt.red)
                 if type(item) == QtWidgets.QGraphicsEllipseItem:
-                    red_pen.setWidth(5)
+                    red_pen.setWidth(2)
+                    item.setBrush(red_brush)
                 else:
-                    red_pen.setWidth(4)
+                    red_pen.setWidth(3)
                 item.setPen(red_pen)
 
 

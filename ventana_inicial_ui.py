@@ -2,17 +2,16 @@
 
 # Form implementation generated from reading ui file 'ventana_inicial.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.2
+# Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets, QtTest
-
+from PyQt5 import QtCore, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(646, 682)
+        MainWindow.resize(861, 682)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -30,6 +29,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.boton_editar.sizePolicy().hasHeightForWidth())
         self.boton_editar.setSizePolicy(sizePolicy)
         self.boton_editar.setBaseSize(QtCore.QSize(0, 0))
+        self.boton_editar.setCheckable(True)
         self.boton_editar.setObjectName("boton_editar")
         self.horizontalLayout.addWidget(self.boton_editar)
         self.combobox_editar = QtWidgets.QComboBox(self.centralwidget)
@@ -40,6 +40,7 @@ class Ui_MainWindow(object):
         self.combobox_editar.setSizePolicy(sizePolicy)
         self.combobox_editar.setMinimumSize(QtCore.QSize(140, 0))
         self.combobox_editar.setEditable(True)
+        self.combobox_editar.setCurrentText("")
         self.combobox_editar.setObjectName("combobox_editar")
         self.horizontalLayout.addWidget(self.combobox_editar)
         spacerItem1 = QtWidgets.QSpacerItem(46, 18, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
@@ -81,6 +82,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addItem(spacerItem3)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.frame_edicion = QtWidgets.QGraphicsView(self.centralwidget)
+        self.frame_edicion.setMouseTracking(True)
         self.frame_edicion.setObjectName("frame_edicion")
         self.verticalLayout.addWidget(self.frame_edicion)
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
@@ -163,7 +165,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.verticalLayout_4, 0, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menu = QtWidgets.QMenuBar(MainWindow)
-        self.menu.setGeometry(QtCore.QRect(0, 0, 646, 26))
+        self.menu.setGeometry(QtCore.QRect(0, 0, 861, 26))
         self.menu.setObjectName("menu")
         self.menuMen = QtWidgets.QMenu(self.menu)
         self.menuMen.setObjectName("menuMen")
@@ -215,5 +217,4 @@ class Ui_MainWindow(object):
         self.actionGuardar.setText(_translate("MainWindow", "Guardar"))
         self.actionManual.setText(_translate("MainWindow", "Manual"))
         self.actionAcerca_de.setText(_translate("MainWindow", "Acerca de ..."))
-
 
