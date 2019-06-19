@@ -517,7 +517,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.frame_edicion.scale(self.zoom, self.zoom)
 
     def closeEvent(self, *args, **kwargs):
-        """Guarda las etiquetas nuevas introducidas en la sesión"""
+        """Guarda las etiquetas nuevas introducidas en la sesión antes de cerrar el programa"""
 
         # Busco nuevas etiquetas
         for i in range(self.combobox_editar.count()):
@@ -597,9 +597,23 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                         print("CLICK ON ME", nombre, valor)
                         if type(valor) == QtWidgets.QGraphicsPathItem:
                             self.resaltar_elemento(nombre)
+                            for i, segmento in enumerate(self.parent.segmentos):
+                                if segmento.nombre == nombre:
+                                    self.parent.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
+                                    self.parent.lista_segmentos.setCurrentRow(i)
+
+                                    self.parent.resaltado = segmento.titulo, i
+                                    self.parent.tipo_resaltado = "Segmento"
 
                         elif type(valor) == QtWidgets.QGraphicsEllipseItem:
                             self.resaltar_elemento(nombre)
+                            for i, punto in enumerate(self.parent.puntos):
+                                if punto.nombre == nombre:
+                                    self.parent.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
+                                    self.parent.lista_puntos.setCurrentRow(i)
+
+                                    self.parent.resaltado = punto.titulo, i
+                                    self.parent.tipo_resaltado = "Punto"
 
     def mouseMoveEvent(self, evento):
         print("MOUSE MOVE")
@@ -650,7 +664,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                         self.parent.tipo_resaltado = "Segmento"
                         self.resaltar_elemento(nombre)
                         self.parent.mostrar_comentario_segmento()
-                        self.parent.lista_segmentos.setCurrentIndex(index)
+                        self.parent.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
+                        self.parent.lista_segmentos.setCurrentRow(index)
 
                     elif type(valor) == QtWidgets.QGraphicsEllipseItem:
                         index = int(re.split("_", nombre)[1])
@@ -658,7 +673,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                         self.parent.tipo_resaltado = "Punto"
                         self.resaltar_elemento(nombre)
                         self.parent.mostrar_comentario_punto()
-                        self.parent.lista_puntos.setCurrentIndex(index)
+                        self.parent.lista_segmentos.setCurrentIndex(QtCore.QModelIndex())
+                        self.parent.lista_puntos.setCurrentRow(index)
 
     def crear_punto(self, evento):
         # Configuro el pincel y la brocha

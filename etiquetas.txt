@@ -19,3 +19,4 @@ CN_Tipo 5
 DC_all
 DPV_Tipo 1
 P_Tipo 2.C1
+Mi_etiqueta
