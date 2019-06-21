@@ -19,7 +19,7 @@
 -------NOMBRE_N</p>
 <p>Donde:</p>
 <ul>
-<li><code>ejecutables</code> son una serie de ficheros que forman la aplicación</li>
+<li><code>ejecutables</code> son una serie de ficheros que forman la aplicación.</li>
 <li><code>etiquetas.txt</code> es el fichero de texto usado para cargar las posibles etiquetas de las anotaciones. Este fichero contiene una etiqueta por línea y se actualiza siempre que se cierra el programa.</li>
 <li>La carpeta <code>TEST</code> debe contener las carpetas <code>IMAGENES</code> y <code>ANOTACIONES</code>. Dentro de cada una de ellas, se deben encontrar los mismos nombres de carpeta tanto para las sub-carpetas que contendrán imágenes como para las sub-carpetas que contengan anotaciones. <strong>Es dentro de las sub-carpetas de ANOTACIONES donde se encontrarán los grafos generados</strong></li>
 </ul>
@@ -27,13 +27,15 @@
 <p>Existen dos opciones a la hora de cargar imágenes para su anotación:</p>
 <ul>
 <li>Menú &gt; Abrir Imagen: permite abrir una única imagen para su anotación.</li>
-<li>Menú &gt; Abrir Carpeta: permite cargar todas las imágenes que se encuentren en una sub-carpeta de <code>IMAGENES</code>. Para cambiar de una imagen a otra, se deben utilizar los botones superiores <code>&lt;-</code> y <code>-&gt;</code></li>
+<li>Menú &gt; Abrir Carpeta: permite cargar todas las imágenes que se encuentren en una sub-carpeta de <code>IMAGENES</code>. Para cambiar de una imagen a otra, se deben utilizar los botones superiores <code>&lt;-</code> y <code>-&gt;</code>. Se debe tener en cuenta que <strong>cada vez que se cambia de imagen, se guardará el estado final de las anotaciones y se generará el grafo</strong> de manera automática.</li>
 </ul>
 <h2><a id="3_Edicin_31"></a>3. Edición</h2>
 <p>Una vez que se dipone de una o varias imágenes cargadas, es posible editarlas.</p>
-<p>En cualquier momento, se podrá ampliar o reducir la imagen cargada aumentando o reduciendo el <strong>zoom</strong>, el cual se sitúa en la parte superior derecha de la ventana.</p>
+<p>En cualquier momento, se podrá ampliar o reducir la imagen cargada aumentando o reduciendo el <strong>zoom</strong>, el cual se sitúa en la parte superior derecha de la ventana. Este puede aumentarse o reducirse con los botones o con la rueda del ratón, siempre que el puntero del ratón esté situado sobre el mismo.</p>
 <h3><a id="Incluir_anotacin_36"></a>Incluir anotación</h3>
-<p>Siempre que se desee añadir una nueva anotación, se debe seleccionar la etiqueta de la anotación del menú desplegable situado a la derecha del botón <code>Editar</code>. Seguidamente, pulsamos sobre el botón <code>Editar</code> para entrar en modo edición.</p>
+<p>Siempre que se desee añadir una nueva anotación, se debe seleccionar la etiqueta de la anotación del menú desplegable situado a la derecha del botón <code>Iniciar Edición</code>.</p>
+<p>Seguidamente, pulsamos sobre el botón <code>Iniciar Edición</code> para entrar en modo edición. Se debe tener en cuenta que durante este modo, la selección de los elementos visuales presentados sobre la imagen sólo son seleccionables desde los listados de puntos y segmentos laterales.</p>
+<p>Para incluir anotaciones:</p>
 <ul>
 <li>Estando en modo edición, hacer click derecho para incluir un <strong>nuevo punto</strong> acorde a la etiqueta seleccionada.</li>
 <li>Estando en modo edición, hacer click izquierdo para comenzar la edición de un <strong>nuevo segmento</strong> acorde a la etiqueta seleccionada.
@@ -42,17 +44,19 @@
 <li>Pulsar la tecla <code>ESC</code> para terminar la edición del segmento hasta el último punto del segmento creado. En este caso, si el segmento creado no contiene líneas, pulsar la tecla <code>ESC</code> resultará en la adición de un nuevo punto en base a la etiqueta seleccionada.</li>
 </ul>
 </li>
+<li>Estando en modo edición, hacer click izquierdo sobre el botón <code>Parar Edición</code> para salir del modo edición. Esto permite seleccionar los puntos o segmentos representados sobre la imagen.</li>
 </ul>
-<p>Tanto los puntos como los segmentos se mostrarán en el correspondiente listado de la parte derecha de la ventana, quedando estos nombrados según la etiqueta seleccionada y un nombre asignado por el sistema.</p>
-<h3><a id="Modificacin_de_anotaciones_46"></a>Modificación de anotaciones</h3>
-<p>Cuando se disponen de elementos de anotación (segmentos o puntos), podremos <strong>cambiar su nombre</strong> e <strong>incluir un comentario</strong> haciendo doble click en el ítem de la lista de segmentos o lista de puntos que se desee. Tabmién podemos acceder a la ventana de comentarios si se realiza doble click sobre uno de los elementos visuales correspondientes a la anotación.</p>
+<p>Tanto los puntos como los segmentos se mostrarán en el correspondiente listado de la parte derecha de la ventana, quedando estos nombrados según la etiqueta seleccionada y un nombre asignado por el sistema que puede ser modificado.</p>
+<h3><a id="Modificacin_de_anotaciones_51"></a>Modificación de anotaciones</h3>
+<p>Cuando se disponen de elementos de anotación (segmentos o puntos), podremos <strong>cambiar su nombre</strong> e <strong>incluir un comentario</strong> haciendo doble click en el ítem de la lista de segmentos o lista de puntos que se desee.</p>
+<p>Tabmién podemos acceder a la ventana de comentarios si se realiza doble click sobre uno de los elementos visuales correspondientes a la anotación, <strong>siempre y cuando el modo edición no esté activo</strong>.</p>
 <p>Por otra parte, si se desean <strong>eliminar elementos</strong>, se debe hacer click izquierdo sobre el ítem de la lista de segmentos o lista de puntos que se desee eliminar. Una vez seleccionado, el elemento visual correspondiente quedará resaltado en rojo y pulsaremos el botón <code>DEL</code> para proceder a su borrado. También es posible seleccionar los elementos visuales haciendo click izquierdo sobre los mismos, quedando seleccionado el ítem de la lista correspondiente y preparado así para su borrado pulsando el botón <code>DEL</code>.</p>
-<h3><a id="Inclusin_de_etiquetas_50"></a>Inclusión de etiquetas</h3>
-<p>Para añadir una nueva etiqueta no presente en el menú desplegable de la derecha del botón <code>Editar</code>, basta con editar el texto seleccionado y pulsar <code>INTRO</code>. De esta forma, el texto modificado se incluirá como una nueva etiqueta.</p>
-<h2><a id="4_Guardado_53"></a>4. Guardado</h2>
+<h3><a id="Inclusin_de_etiquetas_57"></a>Inclusión de etiquetas</h3>
+<p>Para añadir una nueva etiqueta no presente en el menú desplegable de la derecha del botón <code>Iniciar Edición</code>, basta con editar el texto seleccionado y pulsar <code>INTRO</code>. De esta forma, el texto modificado se incluirá como una nueva etiqueta.</p>
+<h2><a id="4_Guardado_60"></a>4. Guardado</h2>
 <p>Si únicamente se ha abierto una imagen, será necesario seleccionar “Edición &gt; Guardar” para proceder a la generación del grafo y el guardado de todas las anotaciones facilitadas sobre la imagen actual.</p>
 <p>Si se ha cargado una carpeta con varias imágenes, el guardado se realizará de manera automática al cambiar de imagen usando los botones <code>&lt;-</code> y <code>-&gt;</code>. De todas formas, también es posible su guardado seleccionando “Edición &gt; Guardar”.</p>
-<p>El guardado generará hasta tres ficheros por imagen (dentro de la sub-carpeta de <code>ANOTACIONES</code> correspondiente:<br>
+<p>El guardado generará hasta tres ficheros por imagen (dentro de la sub-carpeta de <code>ANOTACIONES</code> correspondiente):<br>
 - <code>[&quot;nombre_imagen&quot;]_puntos.pickle</code> : almacena los puntos en formato comprimido si existen (se recomienda no modificar)<br>
 - <code>[&quot;nombre_imagen&quot;]_segmentos.pickle</code> : almacena los segmentos en formato comprimido si existen (se recomienda no modificar)<br>
 - <code>[&quot;nombre_imagen&quot;]_grafo.txt</code> : contiene el grafo (nodos y aristas) generado en base a los segmentos y puntos incluidos.</p>
