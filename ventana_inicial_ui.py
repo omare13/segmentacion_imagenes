@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -23,11 +23,13 @@ class Ui_MainWindow(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.boton_editar = QtWidgets.QToolButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.boton_editar.sizePolicy().hasHeightForWidth())
         self.boton_editar.setSizePolicy(sizePolicy)
+        self.boton_editar.setMinimumSize(QtCore.QSize(100, 0))
+        self.boton_editar.setMaximumSize(QtCore.QSize(100, 16777215))
         self.boton_editar.setBaseSize(QtCore.QSize(0, 0))
         self.boton_editar.setCheckable(True)
         self.boton_editar.setObjectName("boton_editar")
@@ -202,7 +204,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.boton_editar.setText(_translate("MainWindow", "Editar"))
+        self.boton_editar.setText(_translate("MainWindow", "Iniciar Edición"))
         self.boton_previo.setText(_translate("MainWindow", "<-"))
         self.boton_siguiente.setText(_translate("MainWindow", "->"))
         self.boton_borrar.setText(_translate("MainWindow", "DEL"))

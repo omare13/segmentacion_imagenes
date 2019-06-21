@@ -2,11 +2,11 @@
 from ventana_inicial_ui import *
 from ventana_comentario import *
 from os import listdir
-from re import match
+from re import match, split
 import clases
 from pickle import load, dump
 import obtenerGrafo
-from PyQt5 import QtGui, QtTest
+from PyQt5 import QtGui, QtTest, QtCore
 import sys
 
 
@@ -21,6 +21,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Botones --> acciones
         self.boton_editar.clicked.connect(self.nuevo_segmento)  # Botón nuevo segmento
+        self.boton_editar.setEnabled(False)
+        self.conectado = True
         self.boton_previo.clicked.connect(self.imagen_previa)  # Botón de imagen previa
         self.boton_siguiente.clicked.connect(self.imagen_siguiente)  # Botón de imagen siguiente
         self.lista_puntos.itemDoubleClicked.connect(self.mostrar_comentario_punto)  # Doble click en un punto -> comentario
@@ -87,6 +89,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             print("BOTON EDITAR PULSADO?", self.boton_editar.isChecked())
 
+            # Cambio la etiqueta del botón
+            if self.boton_editar.text() != "Parar Edición":
+                self.boton_editar.setText("Parar Edición")
+
+            # Indico que el botón ahora obedece a finalizar_edicion
+            if self.conectado:
+                self.boton_editar.clicked.disconnect(self.nuevo_segmento)
+                self.boton_editar.clicked.connect(self.finalizar_edicion)
+                self.conectado = False
+
+    def finalizar_edicion(self):
+        QtTest.QTest.keyPress(self.frame_edicion, QtCore.Qt.Key_Escape)
+        self.estado_inicial()
+        self.boton_editar.setChecked(False)
+        self.boton_editar.setText("Iniciar Edición")
+        self.boton_editar.clicked.disconnect(self.finalizar_edicion)
+        self.boton_editar.clicked.connect(self.nuevo_segmento)
+        self.conectado = True
+
     def abrir_carpeta(self):
         print("ABRIR CARPETA")
 
@@ -115,7 +136,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Comprobamos que hay imágenes y las recuperamos
             for fichero in listdir(self.carpeta):
-                extension = re.match(r'(.*)(\.[a-zA-Z0-9]{1,5})', fichero)
+                extension = match(r'(.*)(\.[a-zA-Z0-9]{1,5})', fichero)
                 nombre_fichero = extension.group(1)
                 extension_fichero = extension.group(2)
                 if extension_fichero in formatos_validos:
@@ -128,6 +149,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.imagen_actual = 0
                 print("IMAGEN ACTUAL ", self.imagen_actual)
                 self.cargar_imagen()
+                self.boton_editar.setEnabled(True)
             else:
                 self.imagenes = None
                 print("NO SE ENCONTRARON IMÁGENES")
@@ -152,7 +174,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if len(ruta_imagen) > 0:
             self.carpeta = ruta_imagen[:ruta_imagen.rfind('/')]
             fichero = ruta_imagen[ruta_imagen.rfind('/')+1:]
-            extension = re.match(r'(.*)(\.[a-zA-Z0-9]{1,5})', fichero)
+            extension = match(r'(.*)(\.[a-zA-Z0-9]{1,5})', fichero)
             nombre_fichero = extension.group(1)
             extension_fichero = extension.group(2)
 
@@ -169,6 +191,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.imagen_actual = 0
                 print("IMAGEN ACTUAL ", self.imagen_actual)
                 self.cargar_imagen()
+                self.boton_editar.setEnabled(True)
             else:
                 self.imagenes = None
                 print("NO SE ENCONTRARON IMÁGENES")
@@ -249,6 +272,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Paso al estado inicial
         self.estado_inicial()
 
+        # Indico que sigo editando un nuevo segmento
+        self.nuevo_segmento()
+
     def add_segmento(self, puntos_segmento, elemento):
         print("AÑADIR SEGMENTO")
 
@@ -270,6 +296,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Paso al estado inicial
         self.estado_inicial()
+
+        # Indico que sigo editando
+        self.nuevo_segmento()
 
     def imagen_previa(self):
         if self.imagen_actual is not None and self.imagen_actual > 0:
@@ -581,8 +610,6 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
             # Si se indica la opción segmento pero se hace click derecho (botón número 2), entonces se crea un punto
             if (QGraphicsSceneMouseEvent.button() == 2) and (self.creacion_segmento is False):
                 self.crear_punto(QGraphicsSceneMouseEvent)
-                print("QUITAR CHECKED!")
-                self.parent.boton_editar.setChecked(False)
 
             # Si se indica opción segmento y se hace click izqdo(botón 1) por 1ª vez, entramos en creación de segmento
             elif (QGraphicsSceneMouseEvent.button() == 1) and (self.creacion_segmento is False):
@@ -614,8 +641,6 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 self.removeItem(self.path_item)
                 self.path_item = self.addPath(self.path, pen=self.path_pen)
                 self.crear_segmento()
-                print("QUITAR CHECKED!")
-                self.parent.boton_editar.setChecked(False)
         else:
             encontrado = False
             if len(self.elementos.keys()) > 0:
@@ -692,15 +717,13 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                     print("PUNTO FINAL ESCAPE")
                     self.crear_punto_coord(self.punto_final.x(), self.punto_final.y())
                     self.removeItem(self.path_item)
-                print("QUITAR CHECKED!")
-                self.parent.boton_editar.setChecked(False)
 
             # Al pulsar ESCAPE después de seleccionar segmento, sin haberlo comenzado, se cancela el comando segmento
-            elif self.parent.estado == "SEGMENTO" and self.path is None:
-                self.parent.estado_inicial()
-                self.creacion_segmento = False
-                print("QUITAR CHECKED!")
-                self.parent.boton_editar.setChecked(False)
+            # elif self.parent.estado == "SEGMENTO" and self.path is None:
+            #     self.parent.estado_inicial()
+            #     self.creacion_segmento = False
+            #     print("QUITAR CHECKED!")
+            #     self.parent.boton_editar.setChecked(False)
 
     def mouseDoubleClickEvent(self, QGraphicsSceneMouseEvent):
         # Si hay elementos en la escena
@@ -712,7 +735,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 if type(valor) == QtWidgets.QGraphicsPathItem:
                     stroke = stroker.createStroke(valor.path())
                     if stroke.contains(QGraphicsSceneMouseEvent.scenePos()):
-                        index = int(re.split("_", nombre)[1])
+                        index = int(split("_", nombre)[1])
                         self.parent.resaltado = nombre, index
                         self.parent.tipo_resaltado = "Segmento"
                         self.resaltar_elemento(nombre)
@@ -722,7 +745,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
                 elif type(valor) == QtWidgets.QGraphicsEllipseItem:
                     if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
-                        index = int(re.split("_", nombre)[1])
+                        index = int(split("_", nombre)[1])
                         self.parent.resaltado = nombre, index
                         self.parent.tipo_resaltado = "Punto"
                         self.resaltar_elemento(nombre)
