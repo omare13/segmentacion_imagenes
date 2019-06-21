@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from ventana_inicial_ui import *
 from ventana_comentario import *
-import os
-import re
+from os import listdir
+from re import match
 import clases
-import pickle
+from pickle import load, dump
 import obtenerGrafo
 from PyQt5 import QtGui, QtTest
 import sys
@@ -114,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.imagenes = []
 
             # Comprobamos que hay imágenes y las recuperamos
-            for fichero in os.listdir(self.carpeta):
+            for fichero in listdir(self.carpeta):
                 extension = re.match(r'(.*)(\.[a-zA-Z0-9]{1,5})', fichero)
                 nombre_fichero = extension.group(1)
                 extension_fichero = extension.group(2)
@@ -208,18 +208,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fichero_segmentos = self.imagenes[self.imagen_actual].nombre+"_segmentos.pickle"
 
         print(carpeta_anotaciones)
-        if fichero_puntos in os.listdir(carpeta_anotaciones):
+        if fichero_puntos in listdir(carpeta_anotaciones):
             print("ENCONTRADOS PUNTOS")
             with open(carpeta_anotaciones + fichero_puntos, "rb") as file:
-                self.puntos = pickle.load(file)
+                self.puntos = load(file)
         else:
             self.puntos = []
             print("NO SE ENCONTRARON PUNTOS GUARDADOS")
 
-        if fichero_segmentos in os.listdir(carpeta_anotaciones):
+        if fichero_segmentos in listdir(carpeta_anotaciones):
             print("ENCONTRADOS SEGMENTOS")
             with open(carpeta_anotaciones + fichero_segmentos, "rb") as file:
-                self.segmentos = pickle.load(file)
+                self.segmentos = load(file)
         else:
             self.segmentos = []
             print("NO SE ENCONTRARON PUNTOS GUARDADOS")
@@ -314,10 +314,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Guardo los arrays de puntos y segmentos en los ficheros para que presistan los datos
         with open(carpeta_anotaciones + fichero_puntos, 'wb') as file:
-            pickle.dump(self.puntos, file)
+            dump(self.puntos, file)
 
         with open(carpeta_anotaciones + fichero_segmentos, 'wb') as file:
-            pickle.dump(self.segmentos, file)
+            dump(self.segmentos, file)
 
         # Genero el grafo de salida usando obtenerGrafo
         fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"

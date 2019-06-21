@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Fri Mar  8 20:09:18 2019
@@ -6,12 +5,12 @@ Created on Fri Mar  8 20:09:18 2019
 @author: mrincon
 """
 # import the necessary packages
-import argparse
-import cv2
-import os 
-import csv
-import numpy as np
-from copy import deepcopy
+# import argparse
+# import cv2
+from os import path, listdir
+# import csv
+from numpy import array, sqrt, where, arange, zeros, vstack
+# from copy import deepcopy
 
 
 # initialize the list of reference points and boolean indicating
@@ -54,7 +53,7 @@ comentario = ""
 
 def list_files(directory, extension):
 	
-    return (f for f in os.listdir(directory) if f.endswith('.' + extension))
+    return (f for f in listdir(directory) if f.endswith('.' + extension))
 
 
 def saveLIST(mylist, fileName):
@@ -62,7 +61,7 @@ def saveLIST(mylist, fileName):
 	with open(fileName, "w") as file:
 		   file.write(str(mylist))
 def loadLIST(fileName):	
-	if os.path.exists(fileName):
+	if path.exists(fileName):
 		with open(fileName, "r") as file:
 			return(eval(file.readline()))
 	else:
@@ -82,18 +81,18 @@ def escalarTrazos(listaTrazos, zoom):
 def distE(punto, listaPuntos):
 	# punto y listaPuntos son dos numpy array [x,y] y [ [x0,y0], ...,[xn,yn]]
 	if len(punto)==0 or len(listaPuntos)==0:
-		return (np.array([-1]))
+		return (array([-1]))
 	dif0 = listaPuntos[:,0]-punto[0]
 	dif1 = listaPuntos[:,1]-punto[1]
-	return(np.sqrt(dif0**2+dif1**2))
+	return(sqrt(dif0**2+dif1**2))
 	
 
 def indMismoPunto(p2d, listap2d, MAXDIST,NUMPUNTOS):
 	D = distE(p2d,listap2d)
 	if D[0]==-1:
-		return(np.array([-1]))
+		return(array([-1]))
 		
-	indSame = np.array( np.where(D.ravel() <= MAXDIST )) 
+	indSame = array( where(D.ravel() <= MAXDIST ))
 	#if len(indSame):
 	if indSame.shape[1]:
 		if NUMPUNTOS:
@@ -101,14 +100,14 @@ def indMismoPunto(p2d, listap2d, MAXDIST,NUMPUNTOS):
 		else:
 			return(indSame)
 	else:
-		return(np.array([-1]))
+		return(array([-1]))
 
 def puntosANumpy(listaPuntos):
-	listaNew = np.arange(2*len(listaPuntos)).reshape(len(listaPuntos),2)
+	listaNew = arange(2*len(listaPuntos)).reshape(len(listaPuntos),2)
 	print(listaPuntos)
 	for it in range(len(listaPuntos)):
 		print(it)
-		listaNew[it,:] = np.array([listaPuntos[it][0],listaPuntos[it][1]])
+		listaNew[it,:] = array([listaPuntos[it][0],listaPuntos[it][1]])
 		print(listaNew)
 	return(listaNew)
 
@@ -134,12 +133,12 @@ def agruparNodos(listaTrazos, MINDIST):
 def agruparPuntosProximos(listaPuntos, MINDIST):
 	if len(listaPuntos)==0:
 		return({})
-	listanpPuntos = np.array(listaPuntos)
+	listanpPuntos = array(listaPuntos)
 	# calcular distancias para sacar vecinos
 	agrup = [0 for x in range(len(listanpPuntos))]
 	for itP in range(len(listanpPuntos)):
 		D = distE(listanpPuntos[itP], listanpPuntos)
-		indSame = np.array( np.where(D.ravel() <= MINDIST ))
+		indSame = array( where(D.ravel() <= MINDIST ))
 		agrup[itP] = set(indSame[0].tolist())
 
 	#generar grupos: se va analizando si un grupo tiene intersección con otro (se utilizan conjuntos - sets)
@@ -238,15 +237,15 @@ def obtenerGrafo(listaTrazos, MAX_DIST_MISMO_PUNTO):
 			#print(listaArcos)
 			#print(listaPuntosAct)
 			# posNodos contendrá un np array con las posiciones x,y de los nodos
-			posNodos = np.array([])
+			posNodos = array([])
 			for itNodo in listaNodos.keys():
 				if len(posNodos)==0:
-					posNodos = np.array([itNodo[0],itNodo[1]])
+					posNodos = array([itNodo[0],itNodo[1]])
 				else:
-					posNodos = np.vstack((posNodos,np.array([itNodo[0],itNodo[1]])))
+					posNodos = vstack((posNodos,array([itNodo[0],itNodo[1]])))
 
 			# Buscar si los nodos nuevos corresponden con alguno previo (distancia<MAX_DIST_MISMO_PUNTO)
-			coincidenciasPuntos=np.zeros(listaPuntosAct.shape[0])
+			coincidenciasPuntos=zeros(listaPuntosAct.shape[0])
 			for itP in range(listaPuntosAct.shape[0]):
 				coincidenciasPuntos[itP] = indMismoPunto(listaPuntosAct[itP,:], posNodos, MAX_DIST_MISMO_PUNTO, 1)
 
