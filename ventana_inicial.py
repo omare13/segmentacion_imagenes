@@ -203,7 +203,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Creamos la imagen a partir de su ruta en el sistema de ficheros y la dibujamos
         imagen = QtGui.QPixmap(ruta_imagen)
         # self.painter.drawImage(self.frame_edicion.frameRect(), imagen)
-        self.escena.addPixmap(imagen)
+
+        # TODO - Posición relativa a la imagen
+        pixmap_item = self.escena.addPixmap(imagen)
+        self.escena.imagen_x = pixmap_item.scenePos().x()
+        self.escena.imagen_y = pixmap_item.scenePos().y()
+
         print("CARGADA IMAGEN ", self.imagenes[self.imagen_actual].nombre)
 
         # Cargamos datos posiblemente guardados en otra ocasión
@@ -418,12 +423,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for segmento in self.segmentos:
                 trazos_segmento = []
                 for punto in segmento.puntos:
-                    trazos_segmento.append((round(punto.x), round(punto.y)))  # Coordenadas sin decimales
+                    # TODO - Puntos relativos a la imagen
+                    trazos_segmento.append((round(punto.x)-round(self.escena.imagen_x), round(punto.y)-round(self.escena.imagen_y)))  # Coordenadas sin decimales
                 trazos.append(trazos_segmento)
 
         if self.puntos is not None:
             for punto in self.puntos:
-                trazos.append([(round(punto.x), round(punto.y))])  # Coordenadas sin decimales
+                # TODO - Puntos relativos a la imagen
+                trazos.append([(round(punto.x)-round(self.escena.imagen_x), round(punto.y)-round(self.escena.imagen_y))])  # Coordenadas sin decimales
 
         print(trazos, "TRAZOS")
         print("GENERANDO GRAFO")
@@ -595,6 +602,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         self.recta_apoyo = None
         self.punto_final = None
         self.elementos = {}
+        self.imagen_x = None
+        self.imagen_y = None
 
     def init_escena(self):
         self.creacion_segmento = False
