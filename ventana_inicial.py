@@ -281,8 +281,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.nuevo_segmento()
 
         # Muestro la ventana del comentario para el punto recientemente incluido
-        self.resaltado = punto.titulo, len(self.puntos)-1
-        self.mostrar_comentario_punto()
+        if self.check_comentario.isChecked():
+            self.resaltado = punto.titulo, len(self.puntos)-1
+            self.mostrar_comentario_punto()
 
     def add_segmento(self, puntos_segmento, elemento):
         print("AÑADIR SEGMENTO")
@@ -310,8 +311,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.nuevo_segmento()
 
         # Muestro la ventana del comentario para el segmento recientemente incluido
-        self.resaltado = segmento.titulo, len(self.segmentos)-1
-        self.mostrar_comentario_segmento()
+        if self.check_comentario.isChecked():
+            self.resaltado = segmento.titulo, len(self.segmentos)-1
+            self.mostrar_comentario_segmento()
 
     def imagen_previa(self):
         if self.imagen_actual is not None and self.imagen_actual > 0:
