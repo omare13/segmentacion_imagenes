@@ -706,7 +706,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                     self.parent.lista_puntos.setCurrentIndex(QtCore.QModelIndex())
 
     def mouseMoveEvent(self, evento):
-        print("MOUSE MOVE")
+        # print("MOUSE MOVE")
         if (self.parent.estado == "SEGMENTO") and (self.creacion_segmento is True):
             print("RECTA APOYO")
             if self.recta_apoyo is not None:
@@ -753,7 +753,11 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
                 if type(valor) == QtWidgets.QGraphicsPathItem:
                     stroke = stroker.createStroke(valor.path())
                     if stroke.contains(QGraphicsSceneMouseEvent.scenePos()):
-                        index = int(split("_", nombre)[1])
+                        # index = int(split("_", nombre)[1])
+                        index = None
+                        for i, segmento in enumerate(self.parent.segmentos):
+                            if segmento.nombre == nombre:
+                                index = i
                         self.parent.resaltado = nombre, index
                         self.parent.tipo_resaltado = "Segmento"
                         self.resaltar_elemento(nombre)
@@ -763,7 +767,11 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
 
                 elif type(valor) == QtWidgets.QGraphicsEllipseItem:
                     if valor.contains(QGraphicsSceneMouseEvent.scenePos()):
-                        index = int(split("_", nombre)[1])
+                        # index = int(split("_", nombre)[1])
+                        index = None
+                        for i, punto in enumerate(self.parent.puntos):
+                            if punto.nombre == nombre:
+                                index = i
                         self.parent.resaltado = nombre, index
                         self.parent.tipo_resaltado = "Punto"
                         self.resaltar_elemento(nombre)
