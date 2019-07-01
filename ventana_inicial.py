@@ -280,6 +280,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Indico que sigo editando un nuevo segmento
         self.nuevo_segmento()
 
+        # Muestro la ventana del comentario para el punto recientemente incluido
+        self.resaltado = punto.titulo, len(self.puntos)-1
+        self.mostrar_comentario_punto()
+
     def add_segmento(self, puntos_segmento, elemento):
         print("AÑADIR SEGMENTO")
 
@@ -304,6 +308,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Indico que sigo editando
         self.nuevo_segmento()
+
+        # Muestro la ventana del comentario para el segmento recientemente incluido
+        self.resaltado = segmento.titulo, len(self.segmentos)-1
+        self.mostrar_comentario_segmento()
 
     def imagen_previa(self):
         if self.imagen_actual is not None and self.imagen_actual > 0:
@@ -403,7 +411,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.escena.elementos.update({segmento.nombre: elemento})
 
     def reset_modelo(self):
-        self.estado = "INIT"
+        if not self.boton_editar.isChecked():
+            self.estado = "INIT"
         self.puntos = None
         self.segmentos = None
         self.n_puntos = 0
@@ -768,8 +777,8 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         brush = QtGui.QBrush(QtCore.Qt.darkGreen)
 
         # Obtengo las coordenadas del evento de click
-        x = evento.scenePos().x()
-        y = evento.scenePos().y()
+        x = evento.scenePos().x()-2.5
+        y = evento.scenePos().y()-2.5
 
         # Dibujo el punto
         elipse = self.addEllipse(x, y, 5, 5, pen, brush)
@@ -793,7 +802,7 @@ class MyGraphicsScene(QtWidgets.QGraphicsScene):
         brush = QtGui.QBrush(QtCore.Qt.darkGreen)
 
         # Dibujo el punto
-        elipse = self.addEllipse(coord_x, coord_y, 5, 5, pen, brush)
+        elipse = self.addEllipse(coord_x-2.5, coord_y-2.5, 5, 5, pen, brush)
         print(self.items())
         print("PUNTO DIBUJADO")
 
