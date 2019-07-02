@@ -204,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         imagen = QtGui.QPixmap(ruta_imagen)
         # self.painter.drawImage(self.frame_edicion.frameRect(), imagen)
 
-        # TODO - Posición relativa a la imagen
+        # Posición relativa a la imagen
         pixmap_item = self.escena.addPixmap(imagen)
         self.escena.imagen_x = pixmap_item.scenePos().x()
         self.escena.imagen_y = pixmap_item.scenePos().y()
@@ -434,13 +434,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for segmento in self.segmentos:
                 trazos_segmento = []
                 for punto in segmento.puntos:
-                    # TODO - Puntos relativos a la imagen
+                    # Puntos relativos a la imagen
                     trazos_segmento.append((round(punto.x)-round(self.escena.imagen_x), round(punto.y)-round(self.escena.imagen_y)))  # Coordenadas sin decimales
                 trazos.append(trazos_segmento)
 
         if self.puntos is not None:
             for punto in self.puntos:
-                # TODO - Puntos relativos a la imagen
+                # Puntos relativos a la imagen
                 trazos.append([(round(punto.x)-round(self.escena.imagen_x), round(punto.y)-round(self.escena.imagen_y))])  # Coordenadas sin decimales
 
         print(trazos, "TRAZOS")
