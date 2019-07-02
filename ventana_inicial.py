@@ -364,9 +364,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             dump(self.segmentos, file)
 
         # Genero el grafo de salida usando obtenerGrafo
-        fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
-        ruta_fichero_grafo = carpeta_anotaciones + fichero_grafo
-        self.guardar_grafo(ruta_fichero_grafo)
+        # fichero_grafo = self.imagenes[self.imagen_actual].nombre + "_grafo.txt"
+        # ruta_fichero_grafo = carpeta_anotaciones + fichero_grafo
+        # self.guardar_grafo(ruta_fichero_grafo)
 
     def desmontar_imagen(self):
         # Encuentro el elemento en la escena que es de tipo imagen y lo quito
